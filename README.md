@@ -12,3 +12,4 @@ Dev: João Guilherme Sousa e Thanielly Beatriz
 UX/UI: Isaque Fonseca e Rhasta Ferreira
 
 1º semana:
+\

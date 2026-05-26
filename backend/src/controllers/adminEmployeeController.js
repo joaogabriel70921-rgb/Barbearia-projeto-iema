@@ -1,0 +1,140 @@
+import Employee from "../models/Employee.js";
+import User from "../models/User.js";
+import Availability from "../models/Availability.js";
+import Appointment from "../models/Appointment.js";
+import { createUser } from "../services/authService.js";
+
+export async function listEmployees(req, res, next) {
+  try {
+    const employees = await Employee.find().populate("userId", "name email phone active role");
+    res.json(employees);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getEmployee(req, res, next) {
+  try {
+    const employee = await Employee.findById(req.params.id).populate(
+      "userId",
+      "name email phone active role"
+    );
+
+    if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
+
+    res.json(employee);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createEmployee(req, res, next) {
+  try {
+    const user = await createUser({
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      password: req.body.password,
+      role: "funcionario",
+    });
+
+    const employee = await Employee.create({
+      userId: user._id,
+      photo: req.body.photo,
+      position: req.body.position,
+      specialties: req.body.specialties || [],
+    });
+
+    res.status(201).json({ message: "Funcionario criado", employee });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateEmployee(req, res, next) {
+  try {
+    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
+
+    if (req.body.name || req.body.email || req.body.phone) {
+      await User.findByIdAndUpdate(employee.userId, {
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+      });
+    }
+
+    res.json({ message: "Funcionario atualizado", employee });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteEmployee(req, res, next) {
+  try {
+    const employee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      { active: false },
+      { new: true }
+    );
+
+    if (employee) await User.findByIdAndUpdate(employee.userId, { active: false });
+
+    res.json({ message: "Funcionario desativado" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateEmployeeStatus(req, res, next) {
+  try {
+    const employee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
+
+    res.json({ message: "Status atualizado", employee });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getEmployeeAvailability(req, res, next) {
+  try {
+    const availability = await Availability.findOne({ employeeId: req.params.id });
+    res.json(availability);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateEmployeeAvailability(req, res, next) {
+  try {
+    const availability = await Availability.findOneAndUpdate(
+      { employeeId: req.params.id },
+      { ...req.body, employeeId: req.params.id },
+      { new: true, upsert: true }
+    );
+
+    res.json({ message: "Disponibilidade atualizada", availability });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getEmployeeHistory(req, res, next) {
+  try {
+    const appointments = await Appointment.find({ employeeId: req.params.id })
+      .populate("clientId", "name phone email")
+      .populate("serviceIds")
+      .sort({ date: -1, time: -1 });
+
+    res.json(appointments);
+  } catch (error) {
+    next(error);
+  }
+}
