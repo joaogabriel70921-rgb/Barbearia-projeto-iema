@@ -1,5 +1,11 @@
 export function getTodayString() {
-  return new Date().toISOString().split("T")[0];
+  return toLocalDateString(new Date());
+}
+
+export function toLocalDateString(date) {
+  const offset = date.getTimezoneOffset();
+  const local = new Date(date.getTime() - offset * 60000);
+  return local.toISOString().split("T")[0];
 }
 
 export function getDateRange(query) {
@@ -22,8 +28,8 @@ export function getDateRange(query) {
     end.setDate(start.getDate() + (query.period === "week" ? 7 : 30));
 
     return {
-      $gte: start.toISOString().split("T")[0],
-      $lte: end.toISOString().split("T")[0],
+      $gte: toLocalDateString(start),
+      $lte: toLocalDateString(end),
     };
   }
 

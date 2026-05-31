@@ -22,6 +22,10 @@ export async function getEmployeeAvailableSlots(employeeId, date) {
     ? makeTimeSlots(dayWorkHours.start, dayWorkHours.end)
     : makeTimeSlots();
 
+  const dayBreaks = availability.breaks.filter(
+    (item) => item.day === day && item.active
+  );
+
   const bookedAppointments = await Appointment.find({
     employeeId,
     date,
@@ -32,6 +36,8 @@ export async function getEmployeeAvailableSlots(employeeId, date) {
 
   return baseSlots.filter((slot) => {
     const blocked = availability.blockedSlots.includes(`${date}T${slot}`);
-    return !bookedSlots.includes(slot) && !blocked;
+    const isBreak = dayBreaks.some((item) => slot >= item.start && slot < item.end);
+
+    return !bookedSlots.includes(slot) && !blocked && !isBreak;
   });
 }

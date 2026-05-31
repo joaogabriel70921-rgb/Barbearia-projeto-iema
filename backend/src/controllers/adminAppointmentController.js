@@ -5,6 +5,15 @@ import {
   ensureSlotIsFree,
 } from "../services/appointmentService.js";
 
+const APPOINTMENT_STATUSES = [
+  "pendente",
+  "confirmado",
+  "em_andamento",
+  "concluido",
+  "cancelado",
+  "nao_compareceu",
+];
+
 function buildAppointmentFilter(query) {
   const filter = {};
 
@@ -46,6 +55,15 @@ export async function getAppointment(req, res, next) {
 export async function createAppointment(req, res, next) {
   try {
     const { clientId, employeeId, serviceIds, date, time, notes } = req.body;
+
+    if (!clientId || !employeeId || !serviceIds?.length || !date || !time) {
+      return res.status(400).json({ message: "Dados do agendamento incompletos" });
+    }
+
+    if (req.body.status && !APPOINTMENT_STATUSES.includes(req.body.status)) {
+      return res.status(400).json({ message: "Status invalido" });
+    }
+
     const totals = await calculateAppointmentTotals(serviceIds);
 
     await ensureSlotIsFree({ employeeId, date, time });
@@ -70,13 +88,21 @@ export async function createAppointment(req, res, next) {
 export async function updateAppointment(req, res, next) {
   try {
     const update = { ...req.body };
+    const current = await Appointment.findById(req.params.id);
+
+    if (!current) {
+      return res.status(404).json({ message: "Agendamento nao encontrado" });
+    }
+
+    if (update.status && !APPOINTMENT_STATUSES.includes(update.status)) {
+      return res.status(400).json({ message: "Status invalido" });
+    }
 
     if (update.serviceIds?.length) {
       Object.assign(update, await calculateAppointmentTotals(update.serviceIds));
     }
 
     if (update.date || update.time || update.employeeId) {
-      const current = await Appointment.findById(req.params.id);
       await ensureSlotIsFree({
         employeeId: update.employeeId || current.employeeId,
         date: update.date || current.date,
@@ -87,6 +113,7 @@ export async function updateAppointment(req, res, next) {
 
     const appointment = await Appointment.findByIdAndUpdate(req.params.id, update, {
       new: true,
+      runValidators: true,
     });
 
     res.json({ message: "Agendamento atualizado", appointment });
@@ -111,11 +138,19 @@ export async function deleteAppointment(req, res, next) {
 
 export async function updateAppointmentStatus(req, res, next) {
   try {
+    if (!APPOINTMENT_STATUSES.includes(req.body.status)) {
+      return res.status(400).json({ message: "Status invalido" });
+    }
+
     const appointment = await Appointment.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
-      { new: true }
+      { new: true, runValidators: true }
     );
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Agendamento nao encontrado" });
+    }
 
     res.json({ message: "Status atualizado", appointment });
   } catch (error) {
@@ -126,7 +161,16 @@ export async function updateAppointmentStatus(req, res, next) {
 export async function rescheduleAppointment(req, res, next) {
   try {
     const { date, time } = req.body;
+
+    if (!date || !time) {
+      return res.status(400).json({ message: "Data e horario sao obrigatorios" });
+    }
+
     const current = await Appointment.findById(req.params.id);
+
+    if (!current) {
+      return res.status(404).json({ message: "Agendamento nao encontrado" });
+    }
 
     await ensureSlotIsFree({
       employeeId: current.employeeId,
@@ -145,13 +189,3 @@ export async function rescheduleAppointment(req, res, next) {
     next(error);
   }
 }
-const populatedAppointment = await buildAppointmentPopulate(
-  Appointment.findById(appointment._id)
-);
-
-await sendAppointmentCreatedEmail(populatedAppointment);
-
-res.status(201).json({
-  message: "Agendamento criado com sucesso",
-  appointment: populatedAppointment,
-});

@@ -4,6 +4,9 @@ import {
   calculateAppointmentTotals,
   ensureSlotIsFree,
 } from "../services/appointmentService.js";
+import { sendAppointmentCreatedEmail } from "../services/notificationService.js";
+
+const CLIENT_MUTABLE_STATUSES = ["pendente", "confirmado"];
 
 export async function createAppointment(req, res, next) {
   try {
@@ -29,6 +32,8 @@ export async function createAppointment(req, res, next) {
     const populatedAppointment = await buildAppointmentPopulate(
       Appointment.findById(appointment._id)
     );
+
+    await sendAppointmentCreatedEmail(populatedAppointment);
 
     res.status(201).json({
       message: "Agendamento criado com sucesso",
@@ -69,15 +74,24 @@ export async function getMyAppointment(req, res, next) {
 
 export async function cancelMyAppointment(req, res, next) {
   try {
-    const appointment = await Appointment.findOneAndUpdate(
-      { _id: req.params.id, clientId: req.user._id },
-      { status: "cancelado", cancelReason: req.body.reason || "" },
-      { new: true }
-    );
+    const appointment = await Appointment.findOne({
+      _id: req.params.id,
+      clientId: req.user._id,
+    });
 
     if (!appointment) {
       return res.status(404).json({ message: "Agendamento nao encontrado" });
     }
+
+    if (!CLIENT_MUTABLE_STATUSES.includes(appointment.status)) {
+      return res.status(400).json({
+        message: `Nao e possivel cancelar um agendamento com status "${appointment.status}"`,
+      });
+    }
+
+    appointment.status = "cancelado";
+    appointment.cancelReason = req.body.reason || "";
+    await appointment.save();
 
     res.json({ message: "Agendamento cancelado", appointment });
   } catch (error) {
@@ -88,6 +102,11 @@ export async function cancelMyAppointment(req, res, next) {
 export async function rescheduleMyAppointment(req, res, next) {
   try {
     const { date, time } = req.body;
+
+    if (!date || !time) {
+      return res.status(400).json({ message: "Data e horario sao obrigatorios" });
+    }
+
     const appointment = await Appointment.findOne({
       _id: req.params.id,
       clientId: req.user._id,
@@ -95,6 +114,12 @@ export async function rescheduleMyAppointment(req, res, next) {
 
     if (!appointment) {
       return res.status(404).json({ message: "Agendamento nao encontrado" });
+    }
+
+    if (!CLIENT_MUTABLE_STATUSES.includes(appointment.status)) {
+      return res.status(400).json({
+        message: `Nao e possivel reagendar um agendamento com status "${appointment.status}"`,
+      });
     }
 
     await ensureSlotIsFree({

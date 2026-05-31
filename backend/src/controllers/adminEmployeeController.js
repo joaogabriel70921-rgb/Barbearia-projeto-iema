@@ -4,6 +4,8 @@ import Availability from "../models/Availability.js";
 import Appointment from "../models/Appointment.js";
 import { createUser } from "../services/authService.js";
 
+const EMPLOYEE_STATUSES = ["online", "offline", "trabalhando", "pausado"];
+
 export async function listEmployees(req, res, next) {
   try {
     const employees = await Employee.find().populate("userId", "name email phone active role");
@@ -53,17 +55,35 @@ export async function createEmployee(req, res, next) {
 
 export async function updateEmployee(req, res, next) {
   try {
-    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+    const { photo, position, specialties, socialLinks, active } = req.body;
+    const update = {};
+
+    if (photo !== undefined) update.photo = photo;
+    if (position !== undefined) update.position = position;
+    if (specialties !== undefined) update.specialties = specialties;
+    if (socialLinks !== undefined) update.socialLinks = socialLinks;
+    if (active !== undefined) update.active = active;
+
+    const employee = await Employee.findByIdAndUpdate(req.params.id, update, {
       new: true,
+      runValidators: true,
     });
 
     if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
 
-    if (req.body.name || req.body.email || req.body.phone) {
-      await User.findByIdAndUpdate(employee.userId, {
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone,
+    if (
+      req.body.name !== undefined ||
+      req.body.email !== undefined ||
+      req.body.phone !== undefined
+    ) {
+      const userUpdate = {};
+
+      if (req.body.name !== undefined) userUpdate.name = req.body.name;
+      if (req.body.email !== undefined) userUpdate.email = req.body.email;
+      if (req.body.phone !== undefined) userUpdate.phone = req.body.phone;
+
+      await User.findByIdAndUpdate(employee.userId, userUpdate, {
+        runValidators: true,
       });
     }
 
@@ -81,7 +101,9 @@ export async function deleteEmployee(req, res, next) {
       { new: true }
     );
 
-    if (employee) await User.findByIdAndUpdate(employee.userId, { active: false });
+    if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
+
+    await User.findByIdAndUpdate(employee.userId, { active: false });
 
     res.json({ message: "Funcionario desativado" });
   } catch (error) {
@@ -91,11 +113,17 @@ export async function deleteEmployee(req, res, next) {
 
 export async function updateEmployeeStatus(req, res, next) {
   try {
+    if (!EMPLOYEE_STATUSES.includes(req.body.status)) {
+      return res.status(400).json({ message: "Status invalido" });
+    }
+
     const employee = await Employee.findByIdAndUpdate(
       req.params.id,
       { status: req.body.status },
-      { new: true }
+      { new: true, runValidators: true }
     );
+
+    if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
 
     res.json({ message: "Status atualizado", employee });
   } catch (error) {
@@ -117,7 +145,7 @@ export async function updateEmployeeAvailability(req, res, next) {
     const availability = await Availability.findOneAndUpdate(
       { employeeId: req.params.id },
       { ...req.body, employeeId: req.params.id },
-      { new: true, upsert: true }
+      { new: true, upsert: true, runValidators: true }
     );
 
     res.json({ message: "Disponibilidade atualizada", availability });
