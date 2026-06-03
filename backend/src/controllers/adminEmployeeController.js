@@ -3,13 +3,19 @@ import User from "../models/User.js";
 import Availability from "../models/Availability.js";
 import Appointment from "../models/Appointment.js";
 import { createUser } from "../services/authService.js";
+import { getAvailabilityOrDefault } from "../services/availabilityService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const EMPLOYEE_STATUSES = ["online", "offline", "trabalhando", "pausado"];
 
 export async function listEmployees(req, res, next) {
   try {
-    const employees = await Employee.find().populate("userId", "name email phone active role");
-    res.json(employees);
+    const employees = await Employee.find().populate(
+      "userId",
+      "name email phone active role"
+    );
+    sendSuccess(res, employees);
   } catch (error) {
     next(error);
   }
@@ -22,9 +28,11 @@ export async function getEmployee(req, res, next) {
       "name email phone active role"
     );
 
-    if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
+    if (!employee) {
+      throw new ApiError(404, "Funcionário não encontrado");
+    }
 
-    res.json(employee);
+    sendSuccess(res, employee);
   } catch (error) {
     next(error);
   }
@@ -47,7 +55,7 @@ export async function createEmployee(req, res, next) {
       specialties: req.body.specialties || [],
     });
 
-    res.status(201).json({ message: "Funcionario criado", employee });
+    sendSuccess(res, employee, "Funcionário criado", 201);
   } catch (error) {
     next(error);
   }
@@ -69,7 +77,9 @@ export async function updateEmployee(req, res, next) {
       runValidators: true,
     });
 
-    if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
+    if (!employee) {
+      throw new ApiError(404, "Funcionário não encontrado");
+    }
 
     if (
       req.body.name !== undefined ||
@@ -87,7 +97,7 @@ export async function updateEmployee(req, res, next) {
       });
     }
 
-    res.json({ message: "Funcionario atualizado", employee });
+    sendSuccess(res, employee, "Funcionário atualizado");
   } catch (error) {
     next(error);
   }
@@ -101,11 +111,13 @@ export async function deleteEmployee(req, res, next) {
       { new: true }
     );
 
-    if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
+    if (!employee) {
+      throw new ApiError(404, "Funcionário não encontrado");
+    }
 
     await User.findByIdAndUpdate(employee.userId, { active: false });
 
-    res.json({ message: "Funcionario desativado" });
+    sendSuccess(res, null, "Funcionário desativado");
   } catch (error) {
     next(error);
   }
@@ -114,7 +126,7 @@ export async function deleteEmployee(req, res, next) {
 export async function updateEmployeeStatus(req, res, next) {
   try {
     if (!EMPLOYEE_STATUSES.includes(req.body.status)) {
-      return res.status(400).json({ message: "Status invalido" });
+      throw new ApiError(400, "Status inválido");
     }
 
     const employee = await Employee.findByIdAndUpdate(
@@ -123,9 +135,11 @@ export async function updateEmployeeStatus(req, res, next) {
       { new: true, runValidators: true }
     );
 
-    if (!employee) return res.status(404).json({ message: "Funcionario nao encontrado" });
+    if (!employee) {
+      throw new ApiError(404, "Funcionário não encontrado");
+    }
 
-    res.json({ message: "Status atualizado", employee });
+    sendSuccess(res, employee, "Status atualizado");
   } catch (error) {
     next(error);
   }
@@ -133,8 +147,8 @@ export async function updateEmployeeStatus(req, res, next) {
 
 export async function getEmployeeAvailability(req, res, next) {
   try {
-    const availability = await Availability.findOne({ employeeId: req.params.id });
-    res.json(availability);
+    const availability = await getAvailabilityOrDefault(req.params.id);
+    sendSuccess(res, availability);
   } catch (error) {
     next(error);
   }
@@ -148,7 +162,7 @@ export async function updateEmployeeAvailability(req, res, next) {
       { new: true, upsert: true, runValidators: true }
     );
 
-    res.json({ message: "Disponibilidade atualizada", availability });
+    sendSuccess(res, availability, "Disponibilidade atualizada");
   } catch (error) {
     next(error);
   }
@@ -161,7 +175,7 @@ export async function getEmployeeHistory(req, res, next) {
       .populate("serviceIds")
       .sort({ date: -1, time: -1 });
 
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }

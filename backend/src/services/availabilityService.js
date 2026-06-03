@@ -2,6 +2,24 @@ import Appointment from "../models/Appointment.js";
 import Availability from "../models/Availability.js";
 import { makeTimeSlots } from "../utils/dateUtils.js";
 
+// Disponibilidade padrão usada quando o funcionário ainda não configurou a dele.
+export function defaultAvailability(employeeId) {
+  return {
+    employeeId,
+    weekDays: [1, 2, 3, 4, 5, 6],
+    workHours: [],
+    breaks: [],
+    daysOff: [],
+    blockedSlots: [],
+  };
+}
+
+// Retorna a disponibilidade do funcionário ou um objeto padrão (nunca null).
+export async function getAvailabilityOrDefault(employeeId) {
+  const availability = await Availability.findOne({ employeeId });
+  return availability || defaultAvailability(employeeId);
+}
+
 export async function getEmployeeAvailableSlots(employeeId, date) {
   const day = new Date(`${date}T00:00:00`).getDay();
   const availability = await Availability.findOne({ employeeId });

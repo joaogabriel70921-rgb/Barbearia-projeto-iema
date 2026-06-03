@@ -4,6 +4,9 @@ import {
   calculateAppointmentTotals,
   ensureSlotIsFree,
 } from "../services/appointmentService.js";
+import { createNotification } from "../services/notificationService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const APPOINTMENT_STATUSES = [
   "pendente",
@@ -32,7 +35,7 @@ export async function listAppointments(req, res, next) {
       Appointment.find(buildAppointmentFilter(req.query)).sort({ date: -1, time: -1 })
     );
 
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }
@@ -43,10 +46,10 @@ export async function getAppointment(req, res, next) {
     const appointment = await buildAppointmentPopulate(Appointment.findById(req.params.id));
 
     if (!appointment) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
-    res.json(appointment);
+    sendSuccess(res, appointment);
   } catch (error) {
     next(error);
   }
@@ -57,11 +60,11 @@ export async function createAppointment(req, res, next) {
     const { clientId, employeeId, serviceIds, date, time, notes } = req.body;
 
     if (!clientId || !employeeId || !serviceIds?.length || !date || !time) {
-      return res.status(400).json({ message: "Dados do agendamento incompletos" });
+      throw new ApiError(400, "Dados do agendamento incompletos");
     }
 
     if (req.body.status && !APPOINTMENT_STATUSES.includes(req.body.status)) {
-      return res.status(400).json({ message: "Status invalido" });
+      throw new ApiError(400, "Status inválido");
     }
 
     const totals = await calculateAppointmentTotals(serviceIds);
@@ -79,7 +82,15 @@ export async function createAppointment(req, res, next) {
       ...totals,
     });
 
-    res.status(201).json({ message: "Agendamento criado", appointment });
+    await createNotification({
+      userId: clientId,
+      type: "agendamento",
+      title: "Agendamento criado",
+      message: `Um agendamento foi criado para ${date} às ${time}.`,
+      data: { appointmentId: appointment._id },
+    });
+
+    sendSuccess(res, appointment, "Agendamento criado", 201);
   } catch (error) {
     next(error);
   }
@@ -91,11 +102,11 @@ export async function updateAppointment(req, res, next) {
     const current = await Appointment.findById(req.params.id);
 
     if (!current) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
     if (update.status && !APPOINTMENT_STATUSES.includes(update.status)) {
-      return res.status(400).json({ message: "Status invalido" });
+      throw new ApiError(400, "Status inválido");
     }
 
     if (update.serviceIds?.length) {
@@ -116,7 +127,7 @@ export async function updateAppointment(req, res, next) {
       runValidators: true,
     });
 
-    res.json({ message: "Agendamento atualizado", appointment });
+    sendSuccess(res, appointment, "Agendamento atualizado");
   } catch (error) {
     next(error);
   }
@@ -127,10 +138,10 @@ export async function deleteAppointment(req, res, next) {
     const appointment = await Appointment.findByIdAndDelete(req.params.id);
 
     if (!appointment) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
-    res.json({ message: "Agendamento excluido" });
+    sendSuccess(res, null, "Agendamento excluído");
   } catch (error) {
     next(error);
   }
@@ -139,7 +150,7 @@ export async function deleteAppointment(req, res, next) {
 export async function updateAppointmentStatus(req, res, next) {
   try {
     if (!APPOINTMENT_STATUSES.includes(req.body.status)) {
-      return res.status(400).json({ message: "Status invalido" });
+      throw new ApiError(400, "Status inválido");
     }
 
     const appointment = await Appointment.findByIdAndUpdate(
@@ -149,10 +160,18 @@ export async function updateAppointmentStatus(req, res, next) {
     );
 
     if (!appointment) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
-    res.json({ message: "Status atualizado", appointment });
+    await createNotification({
+      userId: appointment.clientId,
+      type: "status",
+      title: "Atualização do agendamento",
+      message: `O status do seu agendamento foi atualizado para "${req.body.status}".`,
+      data: { appointmentId: appointment._id, status: req.body.status },
+    });
+
+    sendSuccess(res, appointment, "Status atualizado");
   } catch (error) {
     next(error);
   }
@@ -163,13 +182,13 @@ export async function rescheduleAppointment(req, res, next) {
     const { date, time } = req.body;
 
     if (!date || !time) {
-      return res.status(400).json({ message: "Data e horario sao obrigatorios" });
+      throw new ApiError(400, "Data e horário são obrigatórios");
     }
 
     const current = await Appointment.findById(req.params.id);
 
     if (!current) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
     await ensureSlotIsFree({
@@ -184,7 +203,15 @@ export async function rescheduleAppointment(req, res, next) {
     current.status = "pendente";
     await current.save();
 
-    res.json({ message: "Agendamento reagendado", appointment: current });
+    await createNotification({
+      userId: current.clientId,
+      type: "agendamento",
+      title: "Agendamento reagendado",
+      message: `Seu agendamento foi reagendado para ${date} às ${time}.`,
+      data: { appointmentId: current._id },
+    });
+
+    sendSuccess(res, current, "Agendamento reagendado");
   } catch (error) {
     next(error);
   }

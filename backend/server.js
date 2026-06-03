@@ -6,6 +6,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 import catalogRoutes from "./src/routes/catalogRoutes.js";
 import appointmentRoutes from "./src/routes/appointmentRoutes.js";
 import employeeRoutes from "./src/routes/employeeRoutes.js";
+import notificationRoutes from "./src/routes/notificationRoutes.js";
 import adminDashboardRoutes from "./src/routes/adminDashboardRoutes.js";
 import adminAppointmentRoutes from "./src/routes/adminAppointmentRoutes.js";
 import adminEmployeeRoutes from "./src/routes/adminEmployeeRoutes.js";
@@ -38,6 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/catalog", catalogRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/employees", employeeRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.use("/api/admin/appointments", adminAppointmentRoutes);

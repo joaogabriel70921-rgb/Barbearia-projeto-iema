@@ -1,6 +1,7 @@
 import Appointment from "../models/Appointment.js";
 import { buildAppointmentReport } from "../services/reportService.js";
 import { getDateRange } from "../utils/dateUtils.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 
 function reportFilter(query, status) {
   const filter = {};
@@ -15,7 +16,7 @@ function reportFilter(query, status) {
 export async function getReportSummary(req, res, next) {
   try {
     const report = await buildAppointmentReport(req.query);
-    res.json(report.summary);
+    sendSuccess(res, report.summary);
   } catch (error) {
     next(error);
   }
@@ -24,7 +25,7 @@ export async function getReportSummary(req, res, next) {
 export async function getCompletedAppointments(req, res, next) {
   try {
     const appointments = await Appointment.find(reportFilter(req.query, "concluido"));
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }
@@ -33,7 +34,7 @@ export async function getCompletedAppointments(req, res, next) {
 export async function getCancelledAppointments(req, res, next) {
   try {
     const appointments = await Appointment.find(reportFilter(req.query, "cancelado"));
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }
@@ -42,7 +43,7 @@ export async function getCancelledAppointments(req, res, next) {
 export async function getNoShows(req, res, next) {
   try {
     const appointments = await Appointment.find(reportFilter(req.query, "nao_compareceu"));
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }
@@ -58,7 +59,7 @@ export async function getTopServices(req, res, next) {
       { $sort: { count: -1 } },
     ]);
 
-    res.json(result);
+    sendSuccess(res, result);
   } catch (error) {
     next(error);
   }
@@ -87,7 +88,7 @@ export async function getEmployeePerformance(req, res, next) {
       { $sort: { completed: -1 } },
     ]);
 
-    res.json(result);
+    sendSuccess(res, result);
   } catch (error) {
     next(error);
   }

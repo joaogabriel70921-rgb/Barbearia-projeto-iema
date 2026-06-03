@@ -1,6 +1,8 @@
 import Employee from "../models/Employee.js";
 import Service from "../models/Service.js";
 import { getEmployeeAvailableSlots } from "../services/availabilityService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export async function listServices(req, res, next) {
   try {
@@ -9,7 +11,7 @@ export async function listServices(req, res, next) {
       populate: { path: "userId", select: "name email phone" },
     });
 
-    res.json(services);
+    sendSuccess(res, services);
   } catch (error) {
     next(error);
   }
@@ -20,10 +22,10 @@ export async function getService(req, res, next) {
     const service = await Service.findOne({ _id: req.params.id, active: true });
 
     if (!service) {
-      return res.status(404).json({ message: "Servico nao encontrado" });
+      throw new ApiError(404, "Serviço não encontrado");
     }
 
-    res.json(service);
+    sendSuccess(res, service);
   } catch (error) {
     next(error);
   }
@@ -36,7 +38,7 @@ export async function listEmployees(req, res, next) {
       "name email phone"
     );
 
-    res.json(employees);
+    sendSuccess(res, employees);
   } catch (error) {
     next(error);
   }
@@ -50,10 +52,10 @@ export async function getEmployee(req, res, next) {
     }).populate("userId", "name email phone");
 
     if (!employee) {
-      return res.status(404).json({ message: "Funcionario nao encontrado" });
+      throw new ApiError(404, "Funcionário não encontrado");
     }
 
-    res.json(employee);
+    sendSuccess(res, employee);
   } catch (error) {
     next(error);
   }
@@ -64,12 +66,12 @@ export async function getAvailableSlots(req, res, next) {
     const { employeeId, date } = req.query;
 
     if (!employeeId || !date) {
-      return res.status(400).json({ message: "employeeId e date sao obrigatorios" });
+      throw new ApiError(400, "employeeId e date são obrigatórios");
     }
 
     const slots = await getEmployeeAvailableSlots(employeeId, date);
 
-    res.json({ slots });
+    sendSuccess(res, slots);
   } catch (error) {
     next(error);
   }

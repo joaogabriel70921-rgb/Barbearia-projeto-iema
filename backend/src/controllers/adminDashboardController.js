@@ -1,6 +1,7 @@
 import Appointment from "../models/Appointment.js";
 import Employee from "../models/Employee.js";
 import { getTodayString } from "../utils/dateUtils.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 
 export async function getDashboardSummary(req, res, next) {
   try {
@@ -30,7 +31,7 @@ export async function getDashboardSummary(req, res, next) {
       }
     );
 
-    res.json(summary);
+    sendSuccess(res, summary);
   } catch (error) {
     next(error);
   }
@@ -47,7 +48,7 @@ export async function getTodayAppointments(req, res, next) {
       })
       .sort({ time: 1 });
 
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }
@@ -60,7 +61,7 @@ export async function getOnlineEmployees(req, res, next) {
       active: true,
     }).populate("userId", "name email phone");
 
-    res.json(employees);
+    sendSuccess(res, employees);
   } catch (error) {
     next(error);
   }

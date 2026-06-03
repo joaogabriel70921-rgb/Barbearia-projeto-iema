@@ -1,3 +1,5 @@
+import { ApiError } from "../utils/ApiError.js";
+
 export function requireFields(fields) {
   return (req, res, next) => {
     const missingFields = fields.filter((field) => {
@@ -6,10 +8,9 @@ export function requireFields(fields) {
     });
 
     if (missingFields.length > 0) {
-      return res.status(400).json({
-        message: "Campos obrigatorios ausentes",
-        fields: missingFields,
-      });
+      return next(
+        new ApiError(400, "Campos obrigatórios ausentes", missingFields)
+      );
     }
 
     next();

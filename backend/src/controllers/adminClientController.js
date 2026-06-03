@@ -1,5 +1,7 @@
 import Appointment from "../models/Appointment.js";
 import User from "../models/User.js";
+import { sendSuccess } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export async function listClients(req, res, next) {
   try {
@@ -14,7 +16,7 @@ export async function listClients(req, res, next) {
     }
 
     const clients = await User.find(filter).sort({ createdAt: -1 });
-    res.json(clients);
+    sendSuccess(res, clients);
   } catch (error) {
     next(error);
   }
@@ -24,9 +26,11 @@ export async function getClient(req, res, next) {
   try {
     const client = await User.findOne({ _id: req.params.id, role: "cliente" });
 
-    if (!client) return res.status(404).json({ message: "Cliente nao encontrado" });
+    if (!client) {
+      throw new ApiError(404, "Cliente não encontrado");
+    }
 
-    res.json(client);
+    sendSuccess(res, client);
   } catch (error) {
     next(error);
   }
@@ -46,10 +50,14 @@ export async function updateClient(req, res, next) {
     const client = await User.findOneAndUpdate(
       { _id: req.params.id, role: "cliente" },
       update,
-      { new: true }
+      { new: true, runValidators: true }
     );
 
-    res.json({ message: "Cliente atualizado", client });
+    if (!client) {
+      throw new ApiError(404, "Cliente não encontrado");
+    }
+
+    sendSuccess(res, client, "Cliente atualizado");
   } catch (error) {
     next(error);
   }
@@ -57,12 +65,17 @@ export async function updateClient(req, res, next) {
 
 export async function deleteClient(req, res, next) {
   try {
-    await User.findOneAndUpdate(
+    const client = await User.findOneAndUpdate(
       { _id: req.params.id, role: "cliente" },
-      { active: false }
+      { active: false },
+      { new: true }
     );
 
-    res.json({ message: "Cliente desativado" });
+    if (!client) {
+      throw new ApiError(404, "Cliente não encontrado");
+    }
+
+    sendSuccess(res, null, "Cliente desativado");
   } catch (error) {
     next(error);
   }
@@ -78,7 +91,7 @@ export async function getClientAppointments(req, res, next) {
       .populate("serviceIds")
       .sort({ date: -1, time: -1 });
 
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }

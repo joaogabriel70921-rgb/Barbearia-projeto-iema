@@ -5,6 +5,10 @@ import {
   buildAppointmentPopulate,
   ensureSlotIsFree,
 } from "../services/appointmentService.js";
+import { getAvailabilityOrDefault } from "../services/availabilityService.js";
+import { createNotification } from "../services/notificationService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 async function findMyEmployee(userId) {
   return Employee.findOne({ userId }).populate("userId", "name email phone");
@@ -18,15 +22,23 @@ const APPOINTMENT_TRANSITIONS = {
   em_andamento: ["concluido", "nao_compareceu"],
 };
 
+const CLIENT_STATUS_MESSAGES = {
+  confirmado: "Seu agendamento foi confirmado.",
+  cancelado: "Seu agendamento foi recusado/cancelado.",
+  em_andamento: "Seu atendimento foi iniciado.",
+  concluido: "Seu atendimento foi concluído.",
+  nao_compareceu: "Você foi marcado como ausente neste agendamento.",
+};
+
 export async function getEmployeeMe(req, res, next) {
   try {
     const employee = await findMyEmployee(req.user._id);
 
     if (!employee) {
-      return res.status(404).json({ message: "Perfil de funcionario nao encontrado" });
+      throw new ApiError(404, "Perfil de funcionário não encontrado");
     }
 
-    res.json(employee);
+    sendSuccess(res, employee);
   } catch (error) {
     next(error);
   }
@@ -46,10 +58,10 @@ export async function updateEmployeeMe(req, res, next) {
     ).populate("userId", "name email phone");
 
     if (!employee) {
-      return res.status(404).json({ message: "Perfil de funcionario nao encontrado" });
+      throw new ApiError(404, "Perfil de funcionário não encontrado");
     }
 
-    res.json({ message: "Perfil atualizado", employee });
+    sendSuccess(res, employee, "Perfil atualizado");
   } catch (error) {
     next(error);
   }
@@ -60,7 +72,7 @@ export async function listEmployeeAppointments(req, res, next) {
     const employee = await Employee.findOne({ userId: req.user._id });
 
     if (!employee) {
-      return res.status(404).json({ message: "Funcionario nao encontrado" });
+      throw new ApiError(404, "Funcionário não encontrado");
     }
 
     const filter = { employeeId: employee._id };
@@ -72,7 +84,7 @@ export async function listEmployeeAppointments(req, res, next) {
       Appointment.find(filter).sort({ date: 1, time: 1 })
     );
 
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }
@@ -84,7 +96,7 @@ export async function updateEmployeeAppointmentStatus(req, res, next) {
     const { status } = req.body;
 
     if (!employee) {
-      return res.status(404).json({ message: "Perfil de funcionario nao encontrado" });
+      throw new ApiError(404, "Perfil de funcionário não encontrado");
     }
 
     const appointment = await Appointment.findOne({
@@ -93,21 +105,31 @@ export async function updateEmployeeAppointmentStatus(req, res, next) {
     });
 
     if (!appointment) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
     const allowedStatuses = APPOINTMENT_TRANSITIONS[appointment.status];
 
     if (!allowedStatuses || !allowedStatuses.includes(status)) {
-      return res.status(400).json({
-        message: `Nao e possivel mudar de "${appointment.status}" para "${status}"`,
-      });
+      throw new ApiError(
+        400,
+        `Não é possível mudar de "${appointment.status}" para "${status}"`
+      );
     }
 
     appointment.status = status;
     await appointment.save();
 
-    res.json({ message: "Status atualizado", appointment });
+    // Notifica o cliente sobre a mudança de status.
+    await createNotification({
+      userId: appointment.clientId,
+      type: "status",
+      title: "Atualização do agendamento",
+      message: CLIENT_STATUS_MESSAGES[status] || `Status atualizado: ${status}`,
+      data: { appointmentId: appointment._id, status },
+    });
+
+    sendSuccess(res, appointment, "Status atualizado");
   } catch (error) {
     next(error);
   }
@@ -144,11 +166,11 @@ export async function suggestAppointmentTime(req, res, next) {
     const { date, time, message } = req.body;
 
     if (!employee) {
-      return res.status(404).json({ message: "Perfil de funcionario nao encontrado" });
+      throw new ApiError(404, "Perfil de funcionário não encontrado");
     }
 
     if (!date || !time) {
-      return res.status(400).json({ message: "Data e horario sao obrigatorios" });
+      throw new ApiError(400, "Data e horário são obrigatórios");
     }
 
     const appointment = await Appointment.findOne({
@@ -157,7 +179,7 @@ export async function suggestAppointmentTime(req, res, next) {
     });
 
     if (!appointment) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
     await ensureSlotIsFree({
@@ -173,7 +195,15 @@ export async function suggestAppointmentTime(req, res, next) {
     appointment.status = "pendente";
     await appointment.save();
 
-    res.json({ message: "Novo horario sugerido", appointment });
+    await createNotification({
+      userId: appointment.clientId,
+      type: "agendamento",
+      title: "Novo horário sugerido",
+      message: `O profissional sugeriu um novo horário: ${date} às ${time}.`,
+      data: { appointmentId: appointment._id },
+    });
+
+    sendSuccess(res, appointment, "Novo horário sugerido");
   } catch (error) {
     next(error);
   }
@@ -182,7 +212,7 @@ export async function suggestAppointmentTime(req, res, next) {
 export async function updateEmployeeStatus(req, res, next) {
   try {
     if (!EMPLOYEE_STATUSES.includes(req.body.status)) {
-      return res.status(400).json({ message: "Status invalido" });
+      throw new ApiError(400, "Status inválido");
     }
 
     const employee = await Employee.findOneAndUpdate(
@@ -192,10 +222,10 @@ export async function updateEmployeeStatus(req, res, next) {
     );
 
     if (!employee) {
-      return res.status(404).json({ message: "Perfil de funcionario nao encontrado" });
+      throw new ApiError(404, "Perfil de funcionário não encontrado");
     }
 
-    res.json({ message: "Status atualizado", employee });
+    sendSuccess(res, employee, "Status atualizado");
   } catch (error) {
     next(error);
   }
@@ -206,12 +236,12 @@ export async function getMyAvailability(req, res, next) {
     const employee = await Employee.findOne({ userId: req.user._id });
 
     if (!employee) {
-      return res.status(404).json({ message: "Perfil de funcionario nao encontrado" });
+      throw new ApiError(404, "Perfil de funcionário não encontrado");
     }
 
-    const availability = await Availability.findOne({ employeeId: employee._id });
+    const availability = await getAvailabilityOrDefault(employee._id);
 
-    res.json(availability);
+    sendSuccess(res, availability);
   } catch (error) {
     next(error);
   }
@@ -222,7 +252,7 @@ export async function updateMyAvailability(req, res, next) {
     const employee = await Employee.findOne({ userId: req.user._id });
 
     if (!employee) {
-      return res.status(404).json({ message: "Perfil de funcionario nao encontrado" });
+      throw new ApiError(404, "Perfil de funcionário não encontrado");
     }
 
     const availability = await Availability.findOneAndUpdate(
@@ -231,7 +261,7 @@ export async function updateMyAvailability(req, res, next) {
       { new: true, upsert: true, runValidators: true }
     );
 
-    res.json({ message: "Disponibilidade atualizada", availability });
+    sendSuccess(res, availability, "Disponibilidade atualizada");
   } catch (error) {
     next(error);
   }

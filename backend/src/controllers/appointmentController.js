@@ -4,7 +4,12 @@ import {
   calculateAppointmentTotals,
   ensureSlotIsFree,
 } from "../services/appointmentService.js";
-import { sendAppointmentCreatedEmail } from "../services/notificationService.js";
+import {
+  createNotification,
+  sendAppointmentCreatedEmail,
+} from "../services/notificationService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const CLIENT_MUTABLE_STATUSES = ["pendente", "confirmado"];
 
@@ -13,7 +18,7 @@ export async function createAppointment(req, res, next) {
     const { employeeId, serviceIds, date, time, notes } = req.body;
 
     if (!employeeId || !serviceIds?.length || !date || !time) {
-      return res.status(400).json({ message: "Dados do agendamento incompletos" });
+      throw new ApiError(400, "Dados do agendamento incompletos");
     }
 
     await ensureSlotIsFree({ employeeId, date, time });
@@ -35,10 +40,16 @@ export async function createAppointment(req, res, next) {
 
     await sendAppointmentCreatedEmail(populatedAppointment);
 
-    res.status(201).json({
-      message: "Agendamento criado com sucesso",
-      appointment: populatedAppointment,
+    // Notifica o funcionário sobre o novo agendamento.
+    await createNotification({
+      userId: populatedAppointment.employeeId?.userId?._id,
+      type: "agendamento",
+      title: "Novo agendamento",
+      message: `Novo agendamento de ${populatedAppointment.clientId?.name || "um cliente"} para ${date} às ${time}.`,
+      data: { appointmentId: populatedAppointment._id },
     });
+
+    sendSuccess(res, populatedAppointment, "Agendamento criado com sucesso", 201);
   } catch (error) {
     next(error);
   }
@@ -50,7 +61,7 @@ export async function listMyAppointments(req, res, next) {
       Appointment.find({ clientId: req.user._id }).sort({ date: -1, time: -1 })
     );
 
-    res.json(appointments);
+    sendSuccess(res, appointments);
   } catch (error) {
     next(error);
   }
@@ -63,10 +74,10 @@ export async function getMyAppointment(req, res, next) {
     );
 
     if (!appointment) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
-    res.json(appointment);
+    sendSuccess(res, appointment);
   } catch (error) {
     next(error);
   }
@@ -80,20 +91,21 @@ export async function cancelMyAppointment(req, res, next) {
     });
 
     if (!appointment) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
     if (!CLIENT_MUTABLE_STATUSES.includes(appointment.status)) {
-      return res.status(400).json({
-        message: `Nao e possivel cancelar um agendamento com status "${appointment.status}"`,
-      });
+      throw new ApiError(
+        400,
+        `Não é possível cancelar um agendamento com status "${appointment.status}"`
+      );
     }
 
     appointment.status = "cancelado";
     appointment.cancelReason = req.body.reason || "";
     await appointment.save();
 
-    res.json({ message: "Agendamento cancelado", appointment });
+    sendSuccess(res, appointment, "Agendamento cancelado");
   } catch (error) {
     next(error);
   }
@@ -104,7 +116,7 @@ export async function rescheduleMyAppointment(req, res, next) {
     const { date, time } = req.body;
 
     if (!date || !time) {
-      return res.status(400).json({ message: "Data e horario sao obrigatorios" });
+      throw new ApiError(400, "Data e horário são obrigatórios");
     }
 
     const appointment = await Appointment.findOne({
@@ -113,13 +125,14 @@ export async function rescheduleMyAppointment(req, res, next) {
     });
 
     if (!appointment) {
-      return res.status(404).json({ message: "Agendamento nao encontrado" });
+      throw new ApiError(404, "Agendamento não encontrado");
     }
 
     if (!CLIENT_MUTABLE_STATUSES.includes(appointment.status)) {
-      return res.status(400).json({
-        message: `Nao e possivel reagendar um agendamento com status "${appointment.status}"`,
-      });
+      throw new ApiError(
+        400,
+        `Não é possível reagendar um agendamento com status "${appointment.status}"`
+      );
     }
 
     await ensureSlotIsFree({
@@ -134,7 +147,7 @@ export async function rescheduleMyAppointment(req, res, next) {
     appointment.status = "pendente";
     await appointment.save();
 
-    res.json({ message: "Agendamento reagendado", appointment });
+    sendSuccess(res, appointment, "Agendamento reagendado");
   } catch (error) {
     next(error);
   }

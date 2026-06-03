@@ -1,13 +1,12 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export async function createUser({ name, email, phone, password, role = "cliente" }) {
   const userExists = await User.findOne({ email });
 
   if (userExists) {
-    const error = new Error("Email ja cadastrado");
-    error.statusCode = 400;
-    throw error;
+    throw new ApiError(400, "Email já cadastrado");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

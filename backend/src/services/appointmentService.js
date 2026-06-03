@@ -1,5 +1,6 @@
 import Appointment from "../models/Appointment.js";
 import Service from "../models/Service.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export async function calculateAppointmentTotals(serviceIds) {
   const services = await Service.find({
@@ -8,9 +9,7 @@ export async function calculateAppointmentTotals(serviceIds) {
   });
 
   if (services.length !== serviceIds.length) {
-    const error = new Error("Um ou mais servicos nao foram encontrados");
-    error.statusCode = 400;
-    throw error;
+    throw new ApiError(400, "Um ou mais serviços não foram encontrados");
   }
 
   return services.reduce(
@@ -37,9 +36,7 @@ export async function ensureSlotIsFree({ employeeId, date, time, ignoreAppointme
   const existingAppointment = await Appointment.findOne(query);
 
   if (existingAppointment) {
-    const error = new Error("Esse horario ja esta ocupado");
-    error.statusCode = 400;
-    throw error;
+    throw new ApiError(400, "Esse horário já está ocupado");
   }
 }
 

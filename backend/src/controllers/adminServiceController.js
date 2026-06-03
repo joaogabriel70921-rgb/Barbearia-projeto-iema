@@ -1,4 +1,6 @@
 import Service from "../models/Service.js";
+import { sendSuccess } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 function pickServiceFields(body) {
   const { name, description, duration, price, employeeIds, active } = body;
@@ -21,7 +23,7 @@ export async function listServices(req, res, next) {
       populate: { path: "userId", select: "name email phone" },
     });
 
-    res.json(services);
+    sendSuccess(res, services);
   } catch (error) {
     next(error);
   }
@@ -34,9 +36,11 @@ export async function getService(req, res, next) {
       populate: { path: "userId", select: "name email phone" },
     });
 
-    if (!service) return res.status(404).json({ message: "Servico nao encontrado" });
+    if (!service) {
+      throw new ApiError(404, "Serviço não encontrado");
+    }
 
-    res.json(service);
+    sendSuccess(res, service);
   } catch (error) {
     next(error);
   }
@@ -47,11 +51,11 @@ export async function createService(req, res, next) {
     const { name, duration, price } = req.body;
 
     if (!name || duration === undefined || price === undefined) {
-      return res.status(400).json({ message: "Nome, duracao e preco sao obrigatorios" });
+      throw new ApiError(400, "Nome, duração e preço são obrigatórios");
     }
 
     const service = await Service.create(pickServiceFields(req.body));
-    res.status(201).json({ message: "Servico criado", service });
+    sendSuccess(res, service, "Serviço criado", 201);
   } catch (error) {
     next(error);
   }
@@ -64,9 +68,11 @@ export async function updateService(req, res, next) {
       runValidators: true,
     });
 
-    if (!service) return res.status(404).json({ message: "Servico nao encontrado" });
+    if (!service) {
+      throw new ApiError(404, "Serviço não encontrado");
+    }
 
-    res.json({ message: "Servico atualizado", service });
+    sendSuccess(res, service, "Serviço atualizado");
   } catch (error) {
     next(error);
   }
@@ -80,9 +86,11 @@ export async function deleteService(req, res, next) {
       { new: true }
     );
 
-    if (!service) return res.status(404).json({ message: "Servico nao encontrado" });
+    if (!service) {
+      throw new ApiError(404, "Serviço não encontrado");
+    }
 
-    res.json({ message: "Servico desativado", service });
+    sendSuccess(res, service, "Serviço desativado");
   } catch (error) {
     next(error);
   }
@@ -92,12 +100,14 @@ export async function toggleServiceActive(req, res, next) {
   try {
     const service = await Service.findById(req.params.id);
 
-    if (!service) return res.status(404).json({ message: "Servico nao encontrado" });
+    if (!service) {
+      throw new ApiError(404, "Serviço não encontrado");
+    }
 
     service.active = !service.active;
     await service.save();
 
-    res.json({ message: "Status do servico atualizado", service });
+    sendSuccess(res, service, "Status do serviço atualizado");
   } catch (error) {
     next(error);
   }
