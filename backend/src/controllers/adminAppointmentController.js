@@ -17,6 +17,18 @@ const APPOINTMENT_STATUSES = [
   "nao_compareceu",
 ];
 
+// Campos que o admin pode alterar em um agendamento (evita mass assignment).
+const ALLOWED_UPDATE_FIELDS = [
+  "clientId",
+  "employeeId",
+  "serviceIds",
+  "date",
+  "time",
+  "notes",
+  "status",
+  "cancelReason",
+];
+
 function buildAppointmentFilter(query) {
   const filter = {};
 
@@ -82,7 +94,7 @@ export async function createAppointment(req, res, next) {
       ...totals,
     });
 
-    await createNotification({
+    createNotification({
       userId: clientId,
       type: "agendamento",
       title: "Agendamento criado",
@@ -98,7 +110,10 @@ export async function createAppointment(req, res, next) {
 
 export async function updateAppointment(req, res, next) {
   try {
-    const update = { ...req.body };
+    const update = {};
+    for (const field of ALLOWED_UPDATE_FIELDS) {
+      if (req.body[field] !== undefined) update[field] = req.body[field];
+    }
     const current = await Appointment.findById(req.params.id);
 
     if (!current) {
@@ -163,7 +178,7 @@ export async function updateAppointmentStatus(req, res, next) {
       throw new ApiError(404, "Agendamento não encontrado");
     }
 
-    await createNotification({
+    createNotification({
       userId: appointment.clientId,
       type: "status",
       title: "Atualização do agendamento",
@@ -203,7 +218,7 @@ export async function rescheduleAppointment(req, res, next) {
     current.status = "pendente";
     await current.save();
 
-    await createNotification({
+    createNotification({
       userId: current.clientId,
       type: "agendamento",
       title: "Agendamento reagendado",

@@ -16,3 +16,21 @@ export function requireFields(fields) {
     next();
   };
 }
+
+export function minLength(field, length) {
+  return (req, res, next) => {
+    const value = req.body[field];
+
+    if (typeof value === "string" && value.length < length) {
+      return next(
+        new ApiError(
+          400,
+          `O campo "${field}" deve ter no mínimo ${length} caracteres`,
+          [field]
+        )
+      );
+    }
+
+    next();
+  };
+}

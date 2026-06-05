@@ -25,7 +25,13 @@ function hashResetToken(token) {
 
 export async function register(req, res, next) {
   try {
-    const user = await createUser(req.body);
+    // Apenas campos seguros: o "role" NUNCA vem do cliente (default = "cliente").
+    const user = await createUser({
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      password: req.body.password,
+    });
 
     sendSuccess(
       res,

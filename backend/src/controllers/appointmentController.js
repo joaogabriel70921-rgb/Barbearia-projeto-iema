@@ -38,10 +38,13 @@ export async function createAppointment(req, res, next) {
       Appointment.findById(appointment._id)
     );
 
-    await sendAppointmentCreatedEmail(populatedAppointment);
+    // Dispara o email e a notificação sem bloquear a resposta da requisição.
+    sendAppointmentCreatedEmail(populatedAppointment).catch((e) =>
+      console.error("Falha ao enviar email de agendamento:", e.message)
+    );
 
     // Notifica o funcionário sobre o novo agendamento.
-    await createNotification({
+    createNotification({
       userId: populatedAppointment.employeeId?.userId?._id,
       type: "agendamento",
       title: "Novo agendamento",

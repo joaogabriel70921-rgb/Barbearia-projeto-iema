@@ -121,7 +121,7 @@ export async function updateEmployeeAppointmentStatus(req, res, next) {
     await appointment.save();
 
     // Notifica o cliente sobre a mudança de status.
-    await createNotification({
+    createNotification({
       userId: appointment.clientId,
       type: "status",
       title: "Atualização do agendamento",
@@ -195,7 +195,7 @@ export async function suggestAppointmentTime(req, res, next) {
     appointment.status = "pendente";
     await appointment.save();
 
-    await createNotification({
+    createNotification({
       userId: appointment.clientId,
       type: "agendamento",
       title: "Novo horário sugerido",

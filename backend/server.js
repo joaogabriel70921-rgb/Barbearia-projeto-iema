@@ -20,9 +20,22 @@ dotenv.config();
 
 const app = express();
 
+// Origens permitidas via FRONTEND_URL (aceita lista separada por vírgula).
+// Sem FRONTEND_URL, libera geral — use apenas em desenvolvimento.
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+if (allowedOrigins.length === 0) {
+  console.warn(
+    "FRONTEND_URL não definido — CORS liberado para qualquer origem (apenas para desenvolvimento)."
+  );
+}
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*",
+    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
   })
 );
 app.use(express.json());

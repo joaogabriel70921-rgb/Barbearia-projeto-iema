@@ -1,12 +1,13 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export async function protect(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Token nao enviado" });
+      throw new ApiError(401, "Token não enviado");
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -14,19 +15,20 @@ export async function protect(req, res, next) {
     const user = await User.findById(decoded.id);
 
     if (!user || !user.active) {
-      return res.status(401).json({ message: "Usuario nao autorizado" });
+      throw new ApiError(401, "Usuário não autorizado");
     }
 
     req.user = user;
     next();
   } catch (error) {
-    res.status(401).json({ message: "Token invalido" });
+    // ApiError lançado acima passa direto; erros do jwt.verify viram "Token inválido".
+    next(error instanceof ApiError ? error : new ApiError(401, "Token inválido"));
   }
 }
 
 export function onlyEmployee(req, res, next) {
   if (!["funcionario", "admin"].includes(req.user.role)) {
-    return res.status(403).json({ message: "Acesso permitido apenas para funcionarios" });
+    return next(new ApiError(403, "Acesso permitido apenas para funcionários"));
   }
 
   next();
@@ -34,7 +36,7 @@ export function onlyEmployee(req, res, next) {
 
 export function onlyAdmin(req, res, next) {
   if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Acesso permitido apenas para admin" });
+    return next(new ApiError(403, "Acesso permitido apenas para admin"));
   }
 
   next();

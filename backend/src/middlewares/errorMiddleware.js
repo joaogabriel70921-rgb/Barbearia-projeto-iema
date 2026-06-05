@@ -27,6 +27,11 @@ export function errorHandler(error, req, res, next) {
     message = "Identificador inválido";
   }
 
+  // Registra erros inesperados (5xx) para facilitar o debug em produção.
+  if (statusCode >= 500) {
+    console.error("Erro interno:", error);
+  }
+
   const payload = {
     success: false,
     message,
