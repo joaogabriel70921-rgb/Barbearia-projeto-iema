@@ -25,7 +25,7 @@ function hashResetToken(token) {
 
 export async function register(req, res, next) {
   try {
-    // Apenas campos seguros: o "role" NUNCA vem do cliente (default = "cliente").
+    
     const user = await createUser({
       name: req.body.name,
       email: req.body.email,
@@ -102,7 +102,9 @@ export async function changePassword(req, res, next) {
     const passwordMatches = await bcrypt.compare(currentPassword, user.password);
 
     if (!passwordMatches) {
-      throw new ApiError(401, "Senha atual incorreta");
+      // 400 (não 401): é erro de input, não de sessão. Com 401 o interceptor do
+      // front apagaria o token e deslogaria o usuário ao errar a senha atual.
+      throw new ApiError(400, "Senha atual incorreta");
     }
 
     user.password = await bcrypt.hash(newPassword, 10);

@@ -135,28 +135,30 @@ export async function updateEmployeeAppointmentStatus(req, res, next) {
   }
 }
 
+// Os wrappers usam `{ ...req.body }` para não quebrar quando a requisição
+// chega sem corpo (req.body === undefined) — ex.: PATCH sem JSON body.
 export async function acceptAppointment(req, res, next) {
-  req.body.status = "confirmado";
+  req.body = { ...req.body, status: "confirmado" };
   return updateEmployeeAppointmentStatus(req, res, next);
 }
 
 export async function rejectAppointment(req, res, next) {
-  req.body.status = "cancelado";
+  req.body = { ...req.body, status: "cancelado" };
   return updateEmployeeAppointmentStatus(req, res, next);
 }
 
 export async function startAppointment(req, res, next) {
-  req.body.status = "em_andamento";
+  req.body = { ...req.body, status: "em_andamento" };
   return updateEmployeeAppointmentStatus(req, res, next);
 }
 
 export async function completeAppointment(req, res, next) {
-  req.body.status = "concluido";
+  req.body = { ...req.body, status: "concluido" };
   return updateEmployeeAppointmentStatus(req, res, next);
 }
 
 export async function markNoShow(req, res, next) {
-  req.body.status = "nao_compareceu";
+  req.body = { ...req.body, status: "nao_compareceu" };
   return updateEmployeeAppointmentStatus(req, res, next);
 }
 
