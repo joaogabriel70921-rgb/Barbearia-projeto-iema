@@ -9,6 +9,7 @@ import { Toaster } from "./client/components/ui/sonner";
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
+import ResetPassword from "./pages/auth/ResetPassword.jsx";
 
 // Área do cliente (telas convertidas)
 import { RootLayout } from "./client/components/RootLayout";
@@ -133,6 +134,7 @@ export const router = createBrowserRouter([
       { path: "/login", Component: Login },
       { path: "/cadastro", Component: Register },
       { path: "/recuperar-senha", Component: ForgotPassword },
+      { path: "/redefinir-senha", Component: ResetPassword },
 
       {
         element: (
