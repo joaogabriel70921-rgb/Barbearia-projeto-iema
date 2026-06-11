@@ -8,8 +8,13 @@ export const authService = {
   },
   register: async (payload) => {
     const body = await http.post("/auth/register", payload);
+    return body.data; // { email } (não loga: precisa confirmar o email)
+  },
+  verifyEmail: async ({ email, code }) => {
+    const body = await http.post("/auth/verify-email", { email, code });
     return body.data; // { token, user }
   },
+  resendCode: (email) => http.post("/auth/resend-code", { email }),
   me: async () => {
     const body = await http.get("/auth/me");
     return body.data.user; // user

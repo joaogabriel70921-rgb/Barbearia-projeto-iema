@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { PasswordInput } from "../ui/password-input";
 import { Label } from "../ui/label";
 import {
   Dialog,
@@ -275,9 +276,8 @@ function EmployeesTab() {
             </div>
             {!editingEmployee && <div>
               <Label htmlFor="password">Senha</Label>
-              <Input
+              <PasswordInput
     id="password"
-    type="password"
     value={formData.password}
     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
   />

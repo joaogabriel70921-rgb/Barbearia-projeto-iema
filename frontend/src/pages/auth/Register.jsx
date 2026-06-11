@@ -31,9 +31,9 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      // Cria a conta SEM logar automaticamente e leva para o login.
+      // Cria a conta (não verificada) e leva para a confirmação por código.
       await authService.register(form);
-      navigate("/login", { replace: true, state: { registered: true } });
+      navigate("/confirmar-email", { replace: true, state: { email: form.email } });
     } catch (err) {
       setError(err.message || "Não foi possível criar a conta.");
       setLoading(false);

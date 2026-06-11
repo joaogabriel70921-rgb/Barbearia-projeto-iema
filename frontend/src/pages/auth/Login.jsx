@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useLocation } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Scissors, Loader2 } from "lucide-react";
 import { useAuth, ROLE_HOME } from "../../contexts/AuthContext.jsx";
@@ -17,11 +17,13 @@ const SIDE_IMAGE =
 export default function Login() {
   const { login, user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const justRegistered = location.state?.registered;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [needsVerify, setNeedsVerify] = useState(false);
 
   if (user) {
     return <Navigate to={ROLE_HOME[user.role] ?? "/"} replace />;
@@ -30,11 +32,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setNeedsVerify(false);
     setLoading(true);
     try {
       await login(email, password); // o AuthContext redireciona pelo papel
     } catch (err) {
       setError(err.message || "Não foi possível entrar.");
+      setNeedsVerify(err.status === 403); // email ainda não confirmado
       setLoading(false);
     }
   };
@@ -141,6 +145,16 @@ export default function Login() {
               <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-md px-3 py-2">
                 {error}
               </p>
+            )}
+
+            {needsVerify && (
+              <button
+                type="button"
+                onClick={() => navigate("/confirmar-email", { state: { email } })}
+                className="w-full text-sm text-primary hover:underline font-medium"
+              >
+                Confirmar email agora →
+              </button>
             )}
 
             <Button type="submit" disabled={loading} className="w-full font-semibold">

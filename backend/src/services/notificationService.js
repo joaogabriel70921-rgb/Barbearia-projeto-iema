@@ -2,6 +2,7 @@ import Notification from "../models/Notification.js";
 import { sendEmail } from "./emailService.js";
 import { appointmentCreatedTemplate } from "../templates/email/appointmentCreatedTemplate.js";
 import { passwordResetTemplate } from "../templates/email/passwordResetTemplate.js";
+import { verificationCodeTemplate } from "../templates/email/verificationCodeTemplate.js";
 
 export async function sendAppointmentCreatedEmail(appointment) {
   if (!appointment?.clientId?.email) {
@@ -26,6 +27,19 @@ export async function sendPasswordResetEmail(user, resetUrl) {
     to: user.email,
     subject: "Recuperação de senha - Barbearia",
     html: passwordResetTemplate({ name: user.name, resetUrl }),
+  });
+}
+
+export async function sendVerificationEmail(user, code) {
+  if (!user?.email) {
+    console.warn("Usuário sem email. Código de verificação não enviado.");
+    return;
+  }
+
+  await sendEmail({
+    to: user.email,
+    subject: "Confirme seu email - Barbearia IEMA",
+    html: verificationCodeTemplate({ name: user.name, code }),
   });
 }
 

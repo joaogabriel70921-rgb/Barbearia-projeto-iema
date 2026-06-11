@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { ArrowLeft, Search, Clock, Award } from "lucide-react";
 import { catalogService } from "../../services/catalogService.js";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { BarberAvatar } from "../components/BarberAvatar";
 function Barbers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [barbers, setBarbers] = useState([]);
@@ -137,10 +137,11 @@ function Barbers() {
     /* Avatar */
   }
                 <div className="relative flex-shrink-0">
-                  <ImageWithFallback
-    src={barber.image}
-    alt={`Foto do barbeiro ${barber.name}`}
-    className="w-24 h-24 rounded-xl object-cover"
+                  <BarberAvatar
+    name={barber.name}
+    image={barber.image}
+    size={96}
+    className="rounded-xl"
     style={{ border: "2px solid var(--bs-gold-light)" }}
   />
                   {barber.availableToday && <div

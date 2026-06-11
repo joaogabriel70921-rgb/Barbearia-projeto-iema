@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle
 } from "../ui/dialog";
-import { User, Mail, Phone, Briefcase, Award, Edit2, Plus, X, Save, Instagram, Youtube, TrendingUp, Users, LogOut } from "lucide-react";
+import { User, Mail, Phone, Briefcase, Award, Edit2, Plus, X, Save, Instagram, Youtube, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../../../contexts/AuthContext.jsx";
 import { ThemeToggle } from "../../../components/ThemeToggle.jsx";
@@ -122,39 +122,6 @@ function ProfileNew({ employee, onUpdate }) {
             </CardContent>
           </Card>
 
-          {
-    /* Estatísticas */
-  }
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Estatísticas do Mês</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
-                    <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Atendimentos</p>
-                    <p className="text-xl font-bold">127</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-lg">
-                    <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Clientes</p>
-                    <p className="text-xl font-bold">89</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {

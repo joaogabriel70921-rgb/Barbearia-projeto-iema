@@ -11,6 +11,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Key,
+  Eye,
+  EyeOff,
   X
 } from "lucide-react";
 function Privacy() {
@@ -25,6 +27,9 @@ function Privacy() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPasswordError("");
@@ -243,11 +248,11 @@ function Privacy() {
   />
                   <input
     id="currentPassword"
-    type="password"
+    type={showCurrent ? "text" : "password"}
     value={currentPassword}
     onChange={(e) => setCurrentPassword(e.target.value)}
     placeholder="Digite sua senha atual"
-    className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 transition-all duration-200 outline-none"
+    className="w-full pl-12 pr-12 py-3.5 rounded-xl border-2 transition-all duration-200 outline-none"
     style={{
       backgroundColor: "var(--bs-surface-alt)",
       borderColor: "var(--bs-border)",
@@ -256,6 +261,16 @@ function Privacy() {
     onFocus={(e) => e.target.style.borderColor = "var(--bs-gold)"}
     onBlur={(e) => e.target.style.borderColor = "var(--bs-border)"}
   />
+                  <button
+    type="button"
+    tabIndex={-1}
+    onClick={() => setShowCurrent((s) => !s)}
+    aria-label={showCurrent ? "Ocultar senha" : "Mostrar senha"}
+    className="absolute right-4 top-1/2 -translate-y-1/2"
+    style={{ color: "var(--bs-text-muted)" }}
+  >
+                    {showCurrent ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
 
@@ -274,11 +289,11 @@ function Privacy() {
   />
                   <input
     id="newPassword"
-    type="password"
+    type={showNew ? "text" : "password"}
     value={newPassword}
     onChange={(e) => setNewPassword(e.target.value)}
     placeholder="Mínimo 6 caracteres"
-    className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 transition-all duration-200 outline-none"
+    className="w-full pl-12 pr-12 py-3.5 rounded-xl border-2 transition-all duration-200 outline-none"
     style={{
       backgroundColor: "var(--bs-surface-alt)",
       borderColor: "var(--bs-border)",
@@ -287,6 +302,16 @@ function Privacy() {
     onFocus={(e) => e.target.style.borderColor = "var(--bs-gold)"}
     onBlur={(e) => e.target.style.borderColor = "var(--bs-border)"}
   />
+                  <button
+    type="button"
+    tabIndex={-1}
+    onClick={() => setShowNew((s) => !s)}
+    aria-label={showNew ? "Ocultar senha" : "Mostrar senha"}
+    className="absolute right-4 top-1/2 -translate-y-1/2"
+    style={{ color: "var(--bs-text-muted)" }}
+  >
+                    {showNew ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
 
@@ -305,11 +330,11 @@ function Privacy() {
   />
                   <input
     id="confirmPassword"
-    type="password"
+    type={showConfirm ? "text" : "password"}
     value={confirmPassword}
     onChange={(e) => setConfirmPassword(e.target.value)}
     placeholder="Digite novamente"
-    className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 transition-all duration-200 outline-none"
+    className="w-full pl-12 pr-12 py-3.5 rounded-xl border-2 transition-all duration-200 outline-none"
     style={{
       backgroundColor: "var(--bs-surface-alt)",
       borderColor: "var(--bs-border)",
@@ -318,6 +343,16 @@ function Privacy() {
     onFocus={(e) => e.target.style.borderColor = "var(--bs-gold)"}
     onBlur={(e) => e.target.style.borderColor = "var(--bs-border)"}
   />
+                  <button
+    type="button"
+    tabIndex={-1}
+    onClick={() => setShowConfirm((s) => !s)}
+    aria-label={showConfirm ? "Ocultar senha" : "Mostrar senha"}
+    className="absolute right-4 top-1/2 -translate-y-1/2"
+    style={{ color: "var(--bs-text-muted)" }}
+  >
+                    {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
 

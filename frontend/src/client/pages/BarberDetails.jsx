@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
-import { ArrowLeft, Calendar, Award, Users, Clock, MapPin, Phone, Instagram, Youtube } from "lucide-react";
+import { ArrowLeft, Clock, Instagram, Youtube } from "lucide-react";
 import { catalogService } from "../../services/catalogService.js";
 function BarberDetails() {
   const { id } = useParams();
@@ -122,33 +122,6 @@ function BarberDetails() {
             </div>
 
             {
-    /* Stats Grid */
-  }
-            <div
-    className="grid grid-cols-3 gap-3 p-4 rounded-xl mb-6"
-    style={{ backgroundColor: "var(--bs-surface-alt)" }}
-  >
-              <div className="text-center">
-                <Award size={20} className="mx-auto mb-1" style={{ color: "var(--bs-gold)" }} />
-                <p className="text-xs" style={{ color: "var(--bs-text-muted)" }}>
-                  5 anos
-                </p>
-              </div>
-              <div className="text-center">
-                <Users size={20} className="mx-auto mb-1" style={{ color: "var(--bs-gold)" }} />
-                <p className="text-xs" style={{ color: "var(--bs-text-muted)" }}>
-                  2.5k clientes
-                </p>
-              </div>
-              <div className="text-center">
-                <Calendar size={20} className="mx-auto mb-1" style={{ color: "var(--bs-gold)" }} />
-                <p className="text-xs" style={{ color: "var(--bs-text-muted)" }}>
-                  Seg-Sáb
-                </p>
-              </div>
-            </div>
-
-            {
     /* About */
   }
             <div className="mb-6">
@@ -182,21 +155,9 @@ function BarberDetails() {
             </div>
 
             {
-    /* Contact Info */
+    /* Redes sociais (somente as reais, quando houver) */
   }
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center gap-3">
-                <MapPin size={18} style={{ color: "var(--bs-text-muted)" }} />
-                <span className="text-sm" style={{ color: "var(--bs-text-secondary)" }}>
-                  Rua das Flores, 123 - Centro
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone size={18} style={{ color: "var(--bs-text-muted)" }} />
-                <span className="text-sm" style={{ color: "var(--bs-text-secondary)" }}>
-                  (11) 98765-4321
-                </span>
-              </div>
+            {(barber.instagram || barber.youtube) && <div className="space-y-3 mb-6">
               {barber.instagram && <a href={`https://instagram.com/${barber.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
                 <Instagram size={18} style={{ color: "#E1306C" }} />
                 <span className="text-sm" style={{ color: "var(--bs-text-secondary)" }}>{barber.instagram}</span>
@@ -205,7 +166,7 @@ function BarberDetails() {
                 <Youtube size={18} style={{ color: "#FF0000" }} />
                 <span className="text-sm" style={{ color: "var(--bs-text-secondary)" }}>{barber.youtube}</span>
               </a>}
-            </div>
+            </div>}
 
             {
     /* CTA Button */

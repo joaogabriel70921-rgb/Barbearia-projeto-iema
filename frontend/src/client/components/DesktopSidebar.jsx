@@ -36,7 +36,7 @@ function DesktopSidebar() {
       letterSpacing: "-0.02em"
     }}
   >
-            Barber<span style={{ color: "var(--bs-gold)" }}>Scheduler</span>
+            Barbearia <span style={{ color: "var(--bs-gold)" }}>IEMA</span>
           </span>
         </Link>
       </div>
@@ -76,10 +76,10 @@ function DesktopSidebar() {
       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-[15px] hover:bg-gray-50`}
       style={{
         background: isActive ? "var(--bs-surface-alt)" : "transparent",
-        color: isActive ? "var(--bs-charcoal)" : "var(--bs-text-secondary)"
+        color: isActive ? "var(--bs-text-primary)" : "var(--bs-text-secondary)"
       }}
     >
-                <link.icon size={20} strokeWidth={isActive ? 2.5 : 2} style={{ color: isActive ? "var(--bs-charcoal)" : "var(--bs-text-muted)" }} />
+                <link.icon size={20} strokeWidth={isActive ? 2.5 : 2} style={{ color: isActive ? "var(--bs-text-primary)" : "var(--bs-text-muted)" }} />
                 {link.label}
               </Link>;
   })}

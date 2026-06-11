@@ -43,15 +43,23 @@ export function AuthProvider({ children }) {
     [navigate]
   );
 
-  const login = useCallback(
-    async (email, password) => {
-      const { token, user: u } = await authService.login({ email, password });
+  // Guarda o token, seta o usuário e redireciona pelo papel.
+  const completeLogin = useCallback(
+    (token, u) => {
       localStorage.setItem("auth_token", token);
       setUser(u);
       redirectByRole(u);
       return u;
     },
     [redirectByRole]
+  );
+
+  const login = useCallback(
+    async (email, password) => {
+      const { token, user: u } = await authService.login({ email, password });
+      return completeLogin(token, u);
+    },
+    [completeLogin]
   );
 
   const register = useCallback(
@@ -87,6 +95,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     registerAndLogin: register, // alias
+    completeLogin, // loga a partir de um token (ex.: após confirmar o email)
     logout,
     forceLogout: doLogout, // logout direto, sem o modal de confirmação
     updateUser,

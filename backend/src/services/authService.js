@@ -2,7 +2,14 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import { ApiError } from "../utils/ApiError.js";
 
-export async function createUser({ name, email, phone, password, role = "cliente" }) {
+export async function createUser({
+  name,
+  email,
+  phone,
+  password,
+  role = "cliente",
+  verified = false,
+}) {
   const userExists = await User.findOne({ email });
 
   if (userExists) {
@@ -17,6 +24,7 @@ export async function createUser({ name, email, phone, password, role = "cliente
     phone,
     password: hashedPassword,
     role,
+    verified,
   });
 }
 

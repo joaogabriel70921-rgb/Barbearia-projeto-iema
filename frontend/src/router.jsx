@@ -10,6 +10,7 @@ import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
+import ConfirmEmail from "./pages/auth/ConfirmEmail.jsx";
 
 // Área do cliente (telas convertidas)
 import { RootLayout } from "./client/components/RootLayout";
@@ -19,7 +20,6 @@ import { BookingSuccess } from "./client/pages/BookingSuccess";
 import { Appointments } from "./client/pages/Appointments";
 import { Profile } from "./client/pages/Profile";
 import { EditProfile } from "./client/pages/EditProfile";
-import { Notifications } from "./client/pages/Notifications";
 import { Privacy } from "./client/pages/Privacy";
 import { Barbers } from "./client/pages/Barbers";
 import { BarberDetails } from "./client/pages/BarberDetails";
@@ -118,7 +118,6 @@ const clientRoutes = [
   { path: "/agendamentos", Component: Appointments },
   { path: "/perfil", Component: Profile },
   { path: "/dados-pessoais", Component: EditProfile },
-  { path: "/notificacoes", Component: Notifications },
   { path: "/privacidade", Component: Privacy },
   { path: "/barbeiros", Component: Barbers },
   { path: "/barbeiro/:id", Component: BarberDetails },
@@ -133,6 +132,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "/login", Component: Login },
       { path: "/cadastro", Component: Register },
+      { path: "/confirmar-email", Component: ConfirmEmail },
       { path: "/recuperar-senha", Component: ForgotPassword },
       { path: "/redefinir-senha", Component: ResetPassword },
 

@@ -3,11 +3,15 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import { createUser, checkPassword } from "../services/authService.js";
 import { generateToken } from "../utils/generateToken.js";
-import { sendPasswordResetEmail } from "../services/notificationService.js";
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from "../services/notificationService.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hora
+const VERIFICATION_TTL_MS = 15 * 60 * 1000; // 15 minutos
 
 function publicUser(user) {
   return {
@@ -20,12 +24,16 @@ function publicUser(user) {
 }
 
 function hashResetToken(token) {
-  return crypto.createHash("sha256").update(token).digest("hex");
+  return crypto.createHash("sha256").update(String(token)).digest("hex");
+}
+
+// Código numérico de 6 dígitos para confirmação de email.
+function generateVerificationCode() {
+  return String(crypto.randomInt(100000, 1000000));
 }
 
 export async function register(req, res, next) {
   try {
-    
     const user = await createUser({
       name: req.body.name,
       email: req.body.email,
@@ -33,11 +41,93 @@ export async function register(req, res, next) {
       password: req.body.password,
     });
 
+    // A conta nasce NÃO verificada: gera o código, manda por email e bloqueia
+    // o login até confirmar. Por isso aqui NÃO retornamos token.
+    const code = generateVerificationCode();
+    user.verificationCode = hashResetToken(code);
+    user.verificationCodeExpires = new Date(Date.now() + VERIFICATION_TTL_MS);
+    await user.save();
+
+    sendVerificationEmail(user, code).catch((e) =>
+      console.error("Falha ao enviar código de verificação:", e.message)
+    );
+
+    sendSuccess(
+      res,
+      { email: user.email },
+      "Conta criada. Enviamos um código de confirmação para o seu email.",
+      201
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function verifyEmail(req, res, next) {
+  try {
+    const { email, code } = req.body;
+    const user = await User.findOne({ email }).select(
+      "+verificationCode +verificationCodeExpires"
+    );
+
+    if (!user) {
+      throw new ApiError(400, "Código inválido ou expirado");
+    }
+
+    // Já verificado: apenas entra (idempotente).
+    if (user.verified) {
+      return sendSuccess(
+        res,
+        { token: generateToken(user), user: publicUser(user) },
+        "Email já confirmado"
+      );
+    }
+
+    const codeMatches =
+      user.verificationCode === hashResetToken(code) &&
+      user.verificationCodeExpires &&
+      user.verificationCodeExpires > new Date();
+
+    if (!codeMatches) {
+      throw new ApiError(400, "Código inválido ou expirado");
+    }
+
+    user.verified = true;
+    user.verificationCode = undefined;
+    user.verificationCodeExpires = undefined;
+    await user.save();
+
     sendSuccess(
       res,
       { token: generateToken(user), user: publicUser(user) },
-      "Conta criada com sucesso",
-      201
+      "Email confirmado com sucesso"
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resendVerificationCode(req, res, next) {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    // Responde sempre igual para não revelar quais emails existem.
+    if (user && !user.verified) {
+      const code = generateVerificationCode();
+      user.verificationCode = hashResetToken(code);
+      user.verificationCodeExpires = new Date(Date.now() + VERIFICATION_TTL_MS);
+      await user.save();
+
+      sendVerificationEmail(user, code).catch((e) =>
+        console.error("Falha ao reenviar código de verificação:", e.message)
+      );
+    }
+
+    sendSuccess(
+      res,
+      null,
+      "Se a conta existir e não estiver confirmada, enviamos um novo código."
     );
   } catch (error) {
     next(error);
@@ -57,6 +147,15 @@ export async function login(req, res, next) {
 
     if (!passwordMatches) {
       throw new ApiError(401, "Email ou senha inválidos");
+    }
+
+    // 403 (não 401) para o front distinguir "não verificado" de "senha errada".
+    if (!user.verified) {
+      throw new ApiError(
+        403,
+        "Confirme seu email para entrar. Enviamos um código para o seu email.",
+        ["unverified"]
+      );
     }
 
     sendSuccess(

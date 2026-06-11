@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { PasswordInput } from "../ui/password-input";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
@@ -223,15 +224,15 @@ function ProfileTab() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="current-password" className="text-foreground">Senha Atual</Label>
-            <Input id="current-password" type="password" value={pwd.current} onChange={(e) => setPwd({ ...pwd, current: e.target.value })} className="bg-input-background border-border/50" />
+            <PasswordInput id="current-password" value={pwd.current} onChange={(e) => setPwd({ ...pwd, current: e.target.value })} className="bg-input-background border-border/50" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="new-password" className="text-foreground">Nova Senha</Label>
-            <Input id="new-password" type="password" value={pwd.next} onChange={(e) => setPwd({ ...pwd, next: e.target.value })} className="bg-input-background border-border/50" />
+            <PasswordInput id="new-password" value={pwd.next} onChange={(e) => setPwd({ ...pwd, next: e.target.value })} className="bg-input-background border-border/50" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirm-password" className="text-foreground">Confirmar Nova Senha</Label>
-            <Input id="confirm-password" type="password" value={pwd.confirm} onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })} className="bg-input-background border-border/50" />
+            <PasswordInput id="confirm-password" value={pwd.confirm} onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })} className="bg-input-background border-border/50" />
           </div>
           <Button onClick={changePassword} disabled={saving === "pwd"} className="bg-primary text-primary-foreground hover:bg-primary/90">
             {saving === "pwd" ? "Alterando…" : "Alterar Senha"}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { Clock, ChevronRight, Scissors, MapPin, Phone, Mail, Instagram, Facebook, Star } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { BarberAvatar } from "../components/BarberAvatar";
 import { BottomNav } from "../components/BottomNav";
 import { StarRating } from "../components/StarRating";
 import { ServiceIcon } from "../components/ServiceIcon";
@@ -57,7 +58,7 @@ function Home() {
       letterSpacing: "-0.02em"
     }}
   >
-              Barber<span style={{ color: "var(--bs-gold)" }}>Scheduler</span>
+              Barbearia <span style={{ color: "var(--bs-gold)" }}>IEMA</span>
             </span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -79,7 +80,7 @@ function Home() {
       <section className="relative overflow-hidden" style={{ height: 340 }}>
         <ImageWithFallback
     src={HERO_IMAGE}
-    alt="Interior premium da barbearia Barber Scheduler"
+    alt="Interior premium da Barbearia IEMA"
     className="w-full h-full object-cover"
   />
         {
@@ -355,7 +356,7 @@ function Home() {
   }
         <div className="pt-4 border-t text-center" style={{ borderColor: "var(--bs-border)" }}>
           <p className="text-xs" style={{ color: "var(--bs-text-muted)" }}>
-            © 2026 BarberScheduler. Todos os direitos reservados.
+            © 2026 Barbearia IEMA. Todos os direitos reservados.
           </p>
         </div>
       </footer>
@@ -384,10 +385,11 @@ function BarberCard({ barber }) {
     /* Avatar + availability dot */
   }
       <div className="relative">
-        <ImageWithFallback
-    src={barber.image}
-    alt={`Foto do barbeiro ${barber.name}`}
-    className="w-20 h-20 rounded-full object-cover"
+        <BarberAvatar
+    name={barber.name}
+    image={barber.image}
+    size={80}
+    className="rounded-full"
     style={{ border: "2px solid var(--bs-gold-light)" }}
   />
         {barber.availableToday && <span

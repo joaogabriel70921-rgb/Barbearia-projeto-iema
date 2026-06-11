@@ -17,6 +17,19 @@ export function requireFields(fields) {
   };
 }
 
+export function isEmail(field) {
+  return (req, res, next) => {
+    const value = req.body[field];
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (typeof value === "string" && !emailRegex.test(value.trim())) {
+      return next(new ApiError(400, "Email inválido", [field]));
+    }
+
+    next();
+  };
+}
+
 export function minLength(field, length) {
   return (req, res, next) => {
     const value = req.body[field];

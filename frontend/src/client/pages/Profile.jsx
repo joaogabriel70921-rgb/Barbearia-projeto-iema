@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import {
   User,
-  Bell,
   Shield,
   HelpCircle,
   LogOut,
@@ -20,7 +18,6 @@ const settingsGroups = [
     title: "Conta",
     items: [
       { icon: User, label: "Dados pessoais", sublabel: "Nome, telefone, e-mail", path: "/dados-pessoais" },
-      { icon: Bell, label: "Notifica\xE7\xF5es", sublabel: "Push, SMS, e-mail", path: "/notificacoes" },
       { icon: Shield, label: "Privacidade", sublabel: "Dados e seguran\xE7a", path: "/privacidade" }
     ]
   },
@@ -38,7 +35,6 @@ const settingsGroups = [
   }
 ];
 function Profile() {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -195,7 +191,7 @@ function Profile() {
     className="text-center text-[11px] mt-8 mb-2"
     style={{ color: "var(--bs-text-muted)" }}
   >
-          Barber Scheduler v1.0.0 · © 2026
+          Barbearia IEMA v1.0.0 · © 2026
         </p>
       </div>
 

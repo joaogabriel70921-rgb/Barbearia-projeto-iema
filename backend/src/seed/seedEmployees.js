@@ -30,7 +30,7 @@ for (const item of employees) {
   let user = await User.findOne({ email: item.email });
 
   if (!user) {
-    user = await createUser({ ...item, role: "funcionario" });
+    user = await createUser({ ...item, role: "funcionario", verified: true });
   }
 
   await Employee.findOneAndUpdate(

@@ -3,7 +3,7 @@
 :root {
   --font-size: 16px;
 
-  /* ── Barber Scheduler Design System ── */
+  /* ── Barbearia IEMA Design System ── */
   --bs-charcoal:        #1A1A1A;
   --bs-charcoal-light:  #2D2D2D;
   --bs-charcoal-muted:  #4A4A4A;
@@ -404,7 +404,7 @@ html {
 .client-theme {
 --font-size: 16px;
 
-  /* ── Barber Scheduler Design System ── */
+  /* ── Barbearia IEMA Design System ── */
   --bs-charcoal:        #1A1A1A;
   --bs-charcoal-light:  #2D2D2D;
   --bs-charcoal-muted:  #4A4A4A;

@@ -26,7 +26,7 @@ function DesktopTopbar() {
       letterSpacing: "-0.02em"
     }}
   >
-            Barber<span style={{ color: "var(--bs-gold)" }}>Scheduler</span>
+            Barbearia <span style={{ color: "var(--bs-gold)" }}>IEMA</span>
           </span>
         </Link>
 
@@ -40,7 +40,7 @@ function DesktopTopbar() {
       key={link.path}
       to={link.path}
       className="relative text-[15px] font-medium transition-colors"
-      style={{ color: isActive ? "var(--bs-charcoal)" : "var(--bs-text-secondary)" }}
+      style={{ color: isActive ? "var(--bs-text-primary)" : "var(--bs-text-secondary)" }}
     >
                 {link.label}
                 {isActive && <span className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full" style={{ background: "var(--bs-gold)" }} />}

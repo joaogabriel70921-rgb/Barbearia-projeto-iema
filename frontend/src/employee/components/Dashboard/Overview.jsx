@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Calendar, Clock, Users, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
@@ -141,14 +140,6 @@ function Overview({ employee, todayAppointments, newAppointments, completedToday
   >
                 {nextAppointment.status}
               </Badge>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <Button className="flex-1 bg-primary hover:bg-primary/90 text-barbershop-dark font-semibold">
-                Iniciar Atendimento
-              </Button>
-              <Button variant="outline" className="sm:flex-none border-primary text-primary hover:bg-primary/10">
-                Detalhes
-              </Button>
             </div>
           </CardContent>
         </Card>}

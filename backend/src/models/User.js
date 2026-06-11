@@ -41,6 +41,18 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationCode: {
+      type: String,
+      select: false,
+    },
+    verificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,

@@ -46,6 +46,7 @@ export async function createEmployee(req, res, next) {
       phone: req.body.phone,
       password: req.body.password,
       role: "funcionario",
+      verified: true, // criado pelo admin (dono) → já confiável
     });
 
     const employee = await Employee.create({
