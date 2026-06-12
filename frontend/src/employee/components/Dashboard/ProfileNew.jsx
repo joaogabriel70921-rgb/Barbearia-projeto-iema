@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle
 } from "../ui/dialog";
-import { User, Mail, Phone, Briefcase, Award, Edit2, Plus, X, Save, Instagram, Youtube, LogOut } from "lucide-react";
+import { User, Mail, Phone, Briefcase, Award, Edit2, Plus, X, Save, Instagram, Youtube, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../../../contexts/AuthContext.jsx";
 import { ThemeToggle } from "../../../components/ThemeToggle.jsx";
@@ -24,6 +24,8 @@ function ProfileNew({ employee, onUpdate }) {
   const [showAddSpecialty, setShowAddSpecialty] = useState(false);
   const [newSpecialty, setNewSpecialty] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showPhotoDialog, setShowPhotoDialog] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState("");
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -99,12 +101,19 @@ function ProfileNew({ employee, onUpdate }) {
             <CardContent className="pt-6">
               <div className="flex flex-col items-center gap-4">
                 <Avatar className="w-32 h-32 ring-4 ring-primary/20">
-                  <AvatarImage src={employee.foto} alt={employee.nome} />
+                  <AvatarImage src={formData.foto} alt={formData.nome} />
                   <AvatarFallback className="text-2xl bg-primary text-barbershop-dark font-bold">
-                    {employee.nome.split(" ").map((n) => n[0]).join("")}
+                    {formData.nome.split(" ").map((n) => n[0]).join("")}
                   </AvatarFallback>
                 </Avatar>
-                {isEditing && <Button variant="outline" size="sm">
+                {isEditing && <Button
+    variant="outline"
+    size="sm"
+    onClick={() => {
+      setPhotoUrl(formData.foto || "");
+      setShowPhotoDialog(true);
+    }}
+  >
                     <Edit2 className="mr-2 h-4 w-4" />
                     Alterar Foto
                   </Button>}
@@ -121,6 +130,60 @@ function ProfileNew({ employee, onUpdate }) {
               </div>
             </CardContent>
           </Card>
+
+          <Dialog open={showPhotoDialog} onOpenChange={setShowPhotoDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Alterar foto</DialogTitle>
+                <DialogDescription>
+                  Cole o link (URL) de uma imagem. Deixe vazio para usar as iniciais.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Input
+    value={photoUrl}
+    onChange={(e) => setPhotoUrl(e.target.value)}
+    placeholder="https://.../sua-foto.jpg"
+  />
+                <div className="flex justify-center">
+                  <Avatar className="w-24 h-24 ring-2 ring-primary/20">
+                    <AvatarImage src={photoUrl} alt="Pré-visualização" />
+                    <AvatarFallback className="bg-primary text-barbershop-dark font-bold">
+                      {formData.nome?.split(" ").map((n) => n[0]).join("") || "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              </div>
+              <DialogFooter className="sm:justify-between gap-2">
+                <Button
+    variant="outline"
+    className="text-destructive hover:text-destructive"
+    onClick={() => {
+      setPhotoUrl("");
+      setFormData({ ...formData, foto: "" });
+      setShowPhotoDialog(false);
+    }}
+  >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Remover foto
+                </Button>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={() => setShowPhotoDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+    className="bg-primary hover:bg-primary/90 text-barbershop-dark"
+    onClick={() => {
+      setFormData({ ...formData, foto: photoUrl.trim() });
+      setShowPhotoDialog(false);
+    }}
+  >
+                    Aplicar
+                  </Button>
+                </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
         </div>
 

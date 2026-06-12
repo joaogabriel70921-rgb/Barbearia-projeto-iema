@@ -191,7 +191,7 @@ function EmployeeDashboard({ employee: initialEmployee, onLogout }) {
   });
   return <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur shadow-sm">
-        <div className="container max-w-7xl flex h-16 items-center justify-between px-4 gap-2">
+        <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 gap-2">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-yellow-600 rounded-full flex items-center justify-center shadow-md">
               <Scissors className="w-5 h-5 text-barbershop-dark" />
@@ -247,7 +247,7 @@ function EmployeeDashboard({ employee: initialEmployee, onLogout }) {
         </div>
       </header>
 
-      <main className="container max-w-7xl py-6 px-4">
+      <main className="max-w-7xl mx-auto py-6 px-4">
         <Tabs defaultValue="inicio" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 bg-muted p-1 h-auto">
             <TabsTrigger
