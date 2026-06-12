@@ -1,8 +1,8 @@
 # Barbearia IEMA
 
-Sistema de agendamento para barbearia (PWA). A aplicação é dividida em uma **API REST** (backend) e uma **interface web** (frontend) que se comunicam por requisições HTTP no padrão JSON (`{ success, message, data }`).
+Sistema de agendamento para barbearia. A aplicação é dividida em uma **API REST** (backend) e uma **interface web** (frontend) que se comunicam por requisições HTTP no padrão JSON (`{ success, message, data }`).
 
-> **IEMA Pleno Bacelar Portela** — Atividade de PWA
+> **IEMA Pleno Bacelar Portela** — Disciplina de **PWA (Projeto de Aplicação Web)**
 > Professor: **William Marinho** · Turma: **302**
 
 ## Equipe
@@ -40,7 +40,7 @@ A aplicação tem **login único**: o papel do usuário (`cliente`, `funcionario
 
 **Backend** — Node.js + Express 5 (ESM), MongoDB Atlas + Mongoose, JWT, bcryptjs, Nodemailer, express-rate-limit. Arquitetura em camadas: **rotas → controllers → services → models**, com middleware de erros centralizado.
 
-**Frontend** — React 18 + Vite 6 (SPA/PWA), React Router 7, Tailwind CSS v4, Radix UI / shadcn, axios, date-fns, Recharts (gráficos do admin), Sonner (toasts) e Motion (animações).
+**Frontend** — React 18 + Vite 6 (SPA — Single Page Application), React Router 7, Tailwind CSS v4, Radix UI / shadcn, axios, date-fns, Recharts (gráficos do admin), Sonner (toasts) e Motion (animações).
 
 ---
 
