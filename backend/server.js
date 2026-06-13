@@ -20,6 +20,11 @@ dotenv.config();
 
 const app = express();
 
+// Atrás de um proxy reverso (Render, etc.) o IP real do cliente vem no
+// cabeçalho X-Forwarded-For. Confiamos em 1 hop para que o express-rate-limit
+// identifique o IP corretamente. (Não use `true`: permitiria spoof do IP.)
+app.set("trust proxy", 1);
+
 // Origens permitidas via FRONTEND_URL (aceita lista separada por vírgula).
 // Sem FRONTEND_URL, libera geral — use apenas em desenvolvimento.
 const allowedOrigins = (process.env.FRONTEND_URL || "")
