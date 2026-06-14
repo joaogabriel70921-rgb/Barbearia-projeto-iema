@@ -38,8 +38,8 @@ function Privacy() {
       setPasswordError("Preencha todos os campos");
       return;
     }
-    if (newPassword.length < 6) {
-      setPasswordError("A nova senha deve ter no m\xEDnimo 6 caracteres");
+    if (!(newPassword.length >= 8 && /[a-zA-Z]/.test(newPassword) && /\d/.test(newPassword))) {
+      setPasswordError("A nova senha deve ter no m\xEDnimo 8 caracteres, incluindo letra e n\xFAmero");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -292,7 +292,7 @@ function Privacy() {
     type={showNew ? "text" : "password"}
     value={newPassword}
     onChange={(e) => setNewPassword(e.target.value)}
-    placeholder="Mínimo 6 caracteres"
+    placeholder="Mínimo 8 caracteres"
     className="w-full pl-12 pr-12 py-3.5 rounded-xl border-2 transition-all duration-200 outline-none"
     style={{
       backgroundColor: "var(--bs-surface-alt)",

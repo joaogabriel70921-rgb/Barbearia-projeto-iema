@@ -13,7 +13,7 @@ import {
 import { protect } from "../middlewares/authMiddleware.js";
 import {
   requireFields,
-  minLength,
+  strongPassword,
   isEmail,
 } from "../middlewares/validateMiddleware.js";
 import { authLimiter } from "../middlewares/rateLimitMiddleware.js";
@@ -25,7 +25,7 @@ router.post(
   authLimiter,
   requireFields(["name", "email", "password"]),
   isEmail("email"),
-  minLength("password", 6),
+  strongPassword("password"),
   register
 );
 router.post("/login", authLimiter, requireFields(["email", "password"]), login);
@@ -51,7 +51,7 @@ router.post(
   "/reset-password",
   authLimiter,
   requireFields(["token", "password"]),
-  minLength("password", 6),
+  strongPassword("password"),
   resetPassword
 );
 
@@ -61,7 +61,7 @@ router.patch(
   "/change-password",
   protect,
   requireFields(["currentPassword", "newPassword"]),
-  minLength("newPassword", 6),
+  strongPassword("newPassword"),
   changePassword
 );
 

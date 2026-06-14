@@ -22,8 +22,8 @@ export default function ResetPassword() {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) {
-      setError("A nova senha deve ter no mínimo 6 caracteres.");
+    if (!(password.length >= 8 && /[a-zA-Z]/.test(password) && /\d/.test(password))) {
+      setError("A nova senha deve ter no mínimo 8 caracteres, incluindo letra e número.");
       return;
     }
     if (password !== confirm) {
@@ -97,7 +97,7 @@ export default function ResetPassword() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 required
                 autoFocus
               />

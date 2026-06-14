@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router";
+import { motion } from "motion/react";
 import { Scissors, UserCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 function DesktopTopbar() {
@@ -43,7 +44,7 @@ function DesktopTopbar() {
       style={{ color: isActive ? "var(--bs-text-primary)" : "var(--bs-text-secondary)" }}
     >
                 {link.label}
-                {isActive && <span className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full" style={{ background: "var(--bs-gold)" }} />}
+                {isActive && <motion.span layoutId="topbarUnderline" className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full" style={{ background: "var(--bs-gold)" }} transition={{ type: "spring", stiffness: 500, damping: 38 }} />}
               </Link>;
   })}
         </nav>

@@ -213,7 +213,7 @@ function Services() {
             {
     /* Desktop Carousel (hidden on mobile) */
   }
-            <div className="hidden lg:block relative px-12">
+            <div className="hidden lg:block relative px-20">
               <div className="overflow-hidden" ref={emblaRef}>
                 <div className="flex gap-8">
                   {filteredServices.map((service) => <div key={service.id} className="flex-[0_0_calc(33.333%-21px)] min-w-0">

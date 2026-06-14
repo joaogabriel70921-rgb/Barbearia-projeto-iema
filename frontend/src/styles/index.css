@@ -1,3 +1,10 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+/* Esconde o controle nativo de "mostrar senha"/limpar do Edge e IE, para não
+   duplicar com o nosso botão de olhinho nos campos de senha. */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}

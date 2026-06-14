@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "motion/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
 import {
@@ -16,7 +17,6 @@ import {
   Scissors,
   BarChart3,
   User,
-  LogOut,
   Menu
 } from "lucide-react";
 import { DashboardTab } from "./admin/DashboardTab";
@@ -66,10 +66,6 @@ function AdminDashboard({ initialTab = "dashboard", importMode = false, onLogout
                 <p className="text-xs text-muted-foreground">Administrador</p>
               </div>
             </div>
-            {!importMode && <Button variant="outline" onClick={onLogout} className="border-border/50 hover:bg-primary hover:text-primary-foreground">
-                <LogOut className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Sair</span>
-              </Button>}
           </div>
         </div>
       </header>
@@ -79,16 +75,24 @@ function AdminDashboard({ initialTab = "dashboard", importMode = false, onLogout
           {
     /* Navigation for Desktop */
   }
-          <TabsList className="hidden lg:grid w-full grid-cols-7 mb-8 bg-card border border-border/50 p-1.5">
+          <TabsList className="hidden lg:grid w-full grid-cols-7 gap-1.5 h-auto mb-8 bg-card border border-border/50 p-1.5 rounded-xl">
             {tabs.map((tab) => {
     const Icon = tab.icon;
+    const isActive = activeTab === tab.value;
     return <TabsTrigger
       key={tab.value}
       value={tab.value}
-      className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+      className="relative flex items-center justify-center gap-2 py-2.5 h-auto text-sm font-medium transition-colors data-[state=active]:text-primary-foreground"
     >
-                  <Icon className="h-4 w-4" />
-                  <span>{tab.label}</span>
+                  {isActive && (
+                    <motion.span
+                      layoutId="adminTabIndicator"
+                      className="absolute inset-0 rounded-xl bg-primary shadow-sm"
+                      transition={{ type: "spring", stiffness: 500, damping: 38 }}
+                    />
+                  )}
+                  <Icon className="relative z-10 h-4 w-4" />
+                  <span className="relative z-10">{tab.label}</span>
                 </TabsTrigger>;
   })}
           </TabsList>

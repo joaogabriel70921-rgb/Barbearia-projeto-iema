@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion } from "motion/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -16,7 +17,6 @@ import {
   Calendar,
   Clock,
   User,
-  LogOut,
   Scissors
 } from "lucide-react";
 function EmployeeDashboard({ employee: initialEmployee, onLogout }) {
@@ -26,6 +26,7 @@ function EmployeeDashboard({ employee: initialEmployee, onLogout }) {
   const [completedToday, setCompletedToday] = useState(0);
   const [availability, setAvailability] = useState(null);
   const [availabilityLoading, setAvailabilityLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("inicio");
 
   // Carrega a agenda do funcionário e divide em pendentes / outros / concluídos de hoje.
   // Reutilizado após cada ação (aceitar, recusar, sugerir...) para refletir o backend.
@@ -197,8 +198,8 @@ function EmployeeDashboard({ employee: initialEmployee, onLogout }) {
               <Scissors className="w-5 h-5 text-barbershop-dark" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="font-semibold text-foreground">Barbearia Premium</h1>
-              <p className="text-xs text-muted-foreground">Painel do Funcionário</p>
+              <h1 className="font-['Playfair_Display'] text-2xl font-bold tracking-wide text-foreground leading-tight">Barbearia Premium</h1>
+              <p className="text-sm text-muted-foreground">Painel do Funcionário</p>
             </div>
             {
     /* Status mobile - visível apenas em telas pequenas */
@@ -234,60 +235,66 @@ function EmployeeDashboard({ employee: initialEmployee, onLogout }) {
                 {employee.nome.split(" ").map((n) => n[0]).join("")}
               </AvatarFallback>
             </Avatar>
-            <Button
-    variant="ghost"
-    size="icon"
-    onClick={onLogout}
-    className="hover:bg-destructive/10 hover:text-destructive transition-colors"
-    title="Sair"
-  >
-              <LogOut className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto py-6 px-4">
-        <Tabs defaultValue="inicio" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-muted p-1 h-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 gap-1 bg-muted p-1 h-auto rounded-xl">
             <TabsTrigger
     value="inicio"
-    className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-0 data-[state=active]:bg-primary data-[state=active]:text-barbershop-dark transition-all"
+    className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 data-[state=active]:text-barbershop-dark transition-colors"
   >
-              <Home className="h-4 w-4" />
-              <span className="text-xs sm:text-sm">Início</span>
+              {activeTab === "inicio" && (
+                <motion.span layoutId="empTabIndicator" className="absolute inset-0 rounded-xl bg-primary shadow-sm" transition={{ type: "spring", stiffness: 500, damping: 38 }} />
+              )}
+              <Home className="relative z-10 h-4 w-4" />
+              <span className="relative z-10 text-xs sm:text-sm">Início</span>
             </TabsTrigger>
             <TabsTrigger
     value="novos"
-    className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-0 data-[state=active]:bg-primary data-[state=active]:text-barbershop-dark transition-all relative"
+    className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 data-[state=active]:text-barbershop-dark transition-colors"
   >
-              <Bell className="h-4 w-4" />
-              <span className="text-xs sm:text-sm">Novos</span>
-              {newAppointments.length > 0 && <span className="absolute top-0 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] text-white font-semibold animate-pulse">
+              {activeTab === "novos" && (
+                <motion.span layoutId="empTabIndicator" className="absolute inset-0 rounded-xl bg-primary shadow-sm" transition={{ type: "spring", stiffness: 500, damping: 38 }} />
+              )}
+              <Bell className="relative z-10 h-4 w-4" />
+              <span className="relative z-10 text-xs sm:text-sm">Novos</span>
+              {newAppointments.length > 0 && <span className="absolute top-0 right-1 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] text-white font-semibold animate-pulse">
                   {newAppointments.length}
                 </span>}
             </TabsTrigger>
             <TabsTrigger
     value="agendamentos"
-    className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-0 data-[state=active]:bg-primary data-[state=active]:text-barbershop-dark transition-all"
+    className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 data-[state=active]:text-barbershop-dark transition-colors"
   >
-              <Calendar className="h-4 w-4" />
-              <span className="text-xs sm:text-sm hidden sm:inline">Agendamentos</span>
-              <span className="text-xs sm:text-sm sm:hidden">Agenda</span>
+              {activeTab === "agendamentos" && (
+                <motion.span layoutId="empTabIndicator" className="absolute inset-0 rounded-xl bg-primary shadow-sm" transition={{ type: "spring", stiffness: 500, damping: 38 }} />
+              )}
+              <Calendar className="relative z-10 h-4 w-4" />
+              <span className="relative z-10 text-xs sm:text-sm hidden sm:inline">Agendamentos</span>
+              <span className="relative z-10 text-xs sm:text-sm sm:hidden">Agenda</span>
             </TabsTrigger>
             <TabsTrigger
     value="horarios"
-    className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-0 data-[state=active]:bg-primary data-[state=active]:text-barbershop-dark transition-all"
+    className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 data-[state=active]:text-barbershop-dark transition-colors"
   >
-              <Clock className="h-4 w-4" />
-              <span className="text-xs sm:text-sm">Horários</span>
+              {activeTab === "horarios" && (
+                <motion.span layoutId="empTabIndicator" className="absolute inset-0 rounded-xl bg-primary shadow-sm" transition={{ type: "spring", stiffness: 500, damping: 38 }} />
+              )}
+              <Clock className="relative z-10 h-4 w-4" />
+              <span className="relative z-10 text-xs sm:text-sm">Horários</span>
             </TabsTrigger>
             <TabsTrigger
     value="perfil"
-    className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:py-0 data-[state=active]:bg-primary data-[state=active]:text-barbershop-dark transition-all"
+    className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 data-[state=active]:text-barbershop-dark transition-colors"
   >
-              <User className="h-4 w-4" />
-              <span className="text-xs sm:text-sm">Perfil</span>
+              {activeTab === "perfil" && (
+                <motion.span layoutId="empTabIndicator" className="absolute inset-0 rounded-xl bg-primary shadow-sm" transition={{ type: "spring", stiffness: 500, damping: 38 }} />
+              )}
+              <User className="relative z-10 h-4 w-4" />
+              <span className="relative z-10 text-xs sm:text-sm">Perfil</span>
             </TabsTrigger>
           </TabsList>
 

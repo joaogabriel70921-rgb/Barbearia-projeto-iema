@@ -25,8 +25,9 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (form.password.length < 6) {
-      setError("A senha deve ter no mínimo 6 caracteres.");
+    const pw = form.password;
+    if (!(pw.length >= 8 && /[a-zA-Z]/.test(pw) && /\d/.test(pw))) {
+      setError("A senha deve ter no mínimo 8 caracteres, incluindo letra e número.");
       return;
     }
     setLoading(true);
@@ -57,7 +58,7 @@ export default function Register() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Senha</Label>
-          <PasswordInput id="password" value={form.password} onChange={update("password")} placeholder="Mínimo 6 caracteres" required />
+          <PasswordInput id="password" value={form.password} onChange={update("password")} placeholder="Mínimo 8 caracteres" required />
         </div>
 
         {error && (

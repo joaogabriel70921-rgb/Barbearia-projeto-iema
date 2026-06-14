@@ -239,8 +239,8 @@ function Booking() {
     /* ── Step indicators ── */
   }
       <div
-    className="sticky z-30 px-4 py-3"
-    style={{ top: 61, background: "var(--bs-off-white)", borderBottom: "1px solid var(--bs-border)" }}
+    className="sticky z-30 px-4 py-3 top-[61px] lg:top-0"
+    style={{ background: "var(--bs-off-white)", borderBottom: "1px solid var(--bs-border)" }}
   >
         <div className="max-w-lg mx-auto flex items-center gap-2">
           {STEP_LABELS.map((label, i) => {
@@ -252,8 +252,8 @@ function Booking() {
                   <div
       className="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300"
       style={{
-        background: isCompleted ? "var(--bs-gold)" : isActive ? "var(--bs-charcoal)" : "var(--bs-border)",
-        color: isCompleted || isActive ? "white" : "var(--bs-text-muted)",
+        background: isCompleted ? "var(--bs-gold)" : isActive ? "var(--bs-text-primary)" : "var(--bs-border)",
+        color: isCompleted ? "white" : isActive ? "var(--bs-off-white)" : "var(--bs-text-muted)",
         fontSize: "11px",
         fontWeight: 700
       }}
@@ -264,7 +264,7 @@ function Booking() {
                   <span
       className="text-[9px] whitespace-nowrap hidden sm:block"
       style={{
-        color: isActive ? "var(--bs-charcoal)" : "var(--bs-text-muted)",
+        color: isActive ? "var(--bs-text-primary)" : "var(--bs-text-muted)",
         fontWeight: isActive ? 600 : 400
       }}
     >

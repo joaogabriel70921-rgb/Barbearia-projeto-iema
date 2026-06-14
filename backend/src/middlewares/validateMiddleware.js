@@ -47,3 +47,29 @@ export function minLength(field, length) {
     next();
   };
 }
+
+// Política de senha: mínimo 8 caracteres, com pelo menos uma letra e um número.
+// Bloqueia senhas fracas como "12345678" (só número) ou "password" (sem número).
+export function strongPassword(field) {
+  return (req, res, next) => {
+    const value = req.body[field];
+
+    if (typeof value === "string") {
+      const hasMinLength = value.length >= 8;
+      const hasLetter = /[a-zA-Z]/.test(value);
+      const hasNumber = /\d/.test(value);
+
+      if (!hasMinLength || !hasLetter || !hasNumber) {
+        return next(
+          new ApiError(
+            400,
+            "A senha deve ter no mínimo 8 caracteres, incluindo letra e número",
+            [field]
+          )
+        );
+      }
+    }
+
+    next();
+  };
+}
